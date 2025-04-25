@@ -1,11 +1,14 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link'; // Import Link
 import { AttendanceRegistration } from '@/components/attendance-registration'; // Import the new component
 import { AttendanceList } from '@/components/attendance-list'; // Import AttendanceList
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator'; // Import Separator
+import { Button } from '@/components/ui/button'; // Import Button
+import { ListChecks, ArrowRight } from 'lucide-react'; // Import icons
 
 export interface AttendanceRecord {
   id: string; // Keep the ID for potential future use (like viewing logs)
@@ -53,9 +56,22 @@ export default function Home() {
       {/* Separator */}
       <Separator className="my-8 w-full max-w-4xl" />
 
-      {/* Render the AttendanceList component */}
-      <div className="w-full max-w-4xl">
-        <h2 className="text-2xl font-semibold mb-4 text-center text-foreground">Recent Attendance Records</h2>
+      {/* Attendance Log Section */}
+      <div className="w-full max-w-4xl space-y-4">
+         {/* Styled Div Bar for Attendance Log Title */}
+         <div className="flex items-center justify-between bg-primary text-primary-foreground p-3 rounded-lg shadow">
+            <div className="flex items-center gap-2">
+                <ListChecks className="h-5 w-5" />
+                <h2 className="text-xl font-semibold">Attendance Log</h2>
+            </div>
+             <Link href="/log" passHref>
+                <Button variant="secondary" size="sm" className="bg-white text-primary hover:bg-gray-100">
+                   View Full Log <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+             </Link>
+         </div>
+
+        {/* Render the AttendanceList component */}
         <AttendanceList records={attendanceRecords} onDelete={deleteRecord} />
       </div>
     </main>
