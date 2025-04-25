@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link'; // Import Link
 import { AttendanceRegistration } from '@/components/attendance-registration'; // Import the new component
-import { AttendanceList } from '@/components/attendance-list'; // Import AttendanceList
+// import { AttendanceList } from '@/components/attendance-list'; // Remove AttendanceList import
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator'; // Import Separator
@@ -18,6 +18,7 @@ export interface AttendanceRecord {
 }
 
 export default function Home() {
+  // Keep state for adding records, but don't display the list here
   const [attendanceRecords, setAttendanceRecords] = useLocalStorage<AttendanceRecord[]>('attendanceRecords', []);
   const { toast } = useToast();
 
@@ -32,20 +33,12 @@ export default function Home() {
     setAttendanceRecords((prevRecords) => [newRecord, ...prevRecords]); // Add new records to the top
     toast({
       title: "Attendance Registered",
-      description: `Attendance for ${subject} at ${new Date(dateTime).toLocaleString()} marked successfully.`,
+      description: `Attendance for ${getSubjectLabel(subject)} at ${new Date(dateTime).toLocaleString()} marked successfully.`, // Use getSubjectLabel here too
       variant: "default", // Use default style for success
     });
   };
 
-  // Delete record function
-  const deleteRecord = (id: string) => {
-    setAttendanceRecords((prevRecords) => prevRecords.filter((record) => record.id !== id));
-     toast({
-      title: "Record Deleted",
-      description: "The attendance record has been removed.",
-      variant: "destructive",
-    });
-  };
+  // Delete record function is removed as the list is not displayed here
 
   return (
     // Use flex container with flex-col to stack components
@@ -56,9 +49,9 @@ export default function Home() {
       {/* Separator */}
       <Separator className="my-8 w-full max-w-4xl" />
 
-      {/* Attendance Log Section */}
+      {/* Attendance Log Link Bar */}
       <div className="w-full max-w-4xl space-y-4">
-         {/* Styled Div Bar for Attendance Log Title */}
+         {/* Styled Div Bar for Attendance Log Title and Link */}
          <div className="flex items-center justify-between bg-primary text-primary-foreground p-3 rounded-lg shadow">
             <div className="flex items-center gap-2">
                 <ListChecks className="h-5 w-5" />
@@ -71,9 +64,35 @@ export default function Home() {
              </Link>
          </div>
 
-        {/* Render the AttendanceList component */}
-        <AttendanceList records={attendanceRecords} onDelete={deleteRecord} />
+         {/* The AttendanceList component is removed from this page */}
+         {/* <AttendanceList records={attendanceRecords} onDelete={deleteRecord} /> */}
+         <p className="text-center text-muted-foreground text-sm">
+             Click the button above to view all recorded attendance entries.
+         </p>
       </div>
     </main>
   );
+}
+
+
+// Helper function to get subject label (copied from attendance-list for use in toast)
+// Keep consistent with the list in attendance-registration.tsx
+const subjects = [
+  { value: 'math-101', label: 'Calculus I' },
+  { value: 'phys-202', label: 'Physics for Engineers' },
+  { value: 'chem-301', label: 'General Chemistry' },
+  { value: 'cs-101', label: 'Intro to Computer Science' },
+  { value: 'ee-201', label: 'Circuit Theory I' },
+  { value: 'me-301', label: 'Thermodynamics' },
+  { value: 'ce-201', label: 'Statics' },
+  { value: 'cs-305', label: 'Data Structures & Algorithms' },
+  { value: 'ee-302', label: 'Signals and Systems' },
+  { value: 'me-302', label: 'Fluid Mechanics' },
+  { value: 'ce-302', label: 'Structural Analysis' },
+  { value: 'eng-100', label: 'Introduction to Engineering Design' },
+];
+
+function getSubjectLabel(value: string): string {
+  const subject = subjects.find(s => s.value === value);
+  return subject ? subject.label : value; // Return value itself if not found
 }
