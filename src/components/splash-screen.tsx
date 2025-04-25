@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react'; // Import Loader icon
 
 interface SplashScreenProps {
   children: React.ReactNode;
@@ -34,7 +35,7 @@ export function SplashScreen({ children }: SplashScreenProps) {
         >
           {/*
             Placeholder for the video.
-            Replace the <p> tag with a <video> tag once you have a video file.
+            Replace the <div> tag with a <video> tag once you have a video file.
             Example:
             <video
               src="/splash-video.mp4" // Place your video in the public folder
@@ -45,10 +46,11 @@ export function SplashScreen({ children }: SplashScreenProps) {
               onEnded={() => setIsLoading(false)} // Optionally end splash when video ends
             />
            */}
-           <div className="w-full h-full flex items-center justify-center bg-primary">
-             {/* Using a simple div with background color as placeholder */}
-             <p className="text-2xl font-bold text-primary-foreground animate-pulse">
-                BlockAttend Loading...
+           <div className="w-full h-full flex flex-col items-center justify-center bg-primary text-primary-foreground">
+             {/* Simple loading indicator */}
+             <Loader2 className="h-12 w-12 animate-spin mb-4" />
+             <p className="text-xl font-medium animate-pulse">
+                Loading...
              </p>
              {/* Or use an actual video tag if you have one */}
              {/*
