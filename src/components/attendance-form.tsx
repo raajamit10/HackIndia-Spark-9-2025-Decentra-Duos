@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Lock } from 'lucide-react'; // Import Lock icon
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -13,24 +13,29 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AttendanceFormProps {
-  onSubmit: (dateTime: string) => void;
+  onSubmit: (dateTime: string, password?: string) => void; // Update onSubmit signature
 }
 
 export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState<string>(format(new Date(), 'HH:mm'));
+  const [password, setPassword] = useState<string>(''); // State for password
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (date) {
+    if (date && password) { // Ensure password is provided
       const [hours, minutes] = time.split(':');
       const combinedDateTime = new Date(date);
       combinedDateTime.setHours(parseInt(hours, 10));
       combinedDateTime.setMinutes(parseInt(minutes, 10));
-      onSubmit(combinedDateTime.toISOString());
-      // Reset form maybe? Or clear fields? For now, let's keep it simple.
+      onSubmit(combinedDateTime.toISOString(), password); // Pass password to onSubmit
+      // Optionally clear fields after submission
       // setDate(new Date());
       // setTime(format(new Date(), 'HH:mm'));
+      // setPassword('');
+    } else if (!password) {
+        // Basic validation feedback - could use form libraries for better UX
+        alert("Please enter the Unique ID (Password).");
     }
   };
 
@@ -80,6 +85,22 @@ export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
               />
                <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
             </div>
+          </div>
+          {/* Password Input */}
+          <div className="space-y-2">
+             <Label htmlFor="password-input" className="text-muted-foreground">Unique ID (Password)</Label>
+              <div className="relative">
+                  <Input
+                  id="password-input"
+                  type="password" // Use type="password" to mask input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                  placeholder="Enter your unique ID"
+                  required
+                  />
+                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
+              </div>
           </div>
           <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
             Submit Attendance

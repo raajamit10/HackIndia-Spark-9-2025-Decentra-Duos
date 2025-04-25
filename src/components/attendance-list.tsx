@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AttendanceRecord } from '@/app/page'; // Assuming interface is defined here
+import type { AttendanceRecord } from '@/app/page'; // Use type import
 
 interface AttendanceListProps {
   records: AttendanceRecord[];
@@ -31,6 +31,7 @@ export function AttendanceList({ records, onDelete }: AttendanceListProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[70%] text-foreground">Date & Time</TableHead>
+              {/* Password column is intentionally omitted for privacy/security */}
               <TableHead className="text-right text-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -49,6 +50,7 @@ export function AttendanceList({ records, onDelete }: AttendanceListProps) {
                     <TableCell className="font-medium text-foreground">
                       {format(new Date(record.dateTime), 'PPP p')}
                     </TableCell>
+                    {/* Cell for password is intentionally omitted */}
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

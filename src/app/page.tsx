@@ -6,25 +6,40 @@ import { AttendanceList } from '@/components/attendance-list';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast'; // Import useToast
 
 export interface AttendanceRecord {
   id: string;
   dateTime: string;
+  password?: string; // Add optional password field
 }
 
 export default function Home() {
   const [attendanceRecords, setAttendanceRecords] = useLocalStorage<AttendanceRecord[]>('attendanceRecords', []);
+  const { toast } = useToast(); // Initialize toast
 
-  const addRecord = (dateTime: string) => {
+  const addRecord = (dateTime: string, password?: string) => {
+    // Basic check: Don't add if password is required but not provided (can be enhanced)
+    // For this simple case, we'll just store it if provided.
     const newRecord: AttendanceRecord = {
       id: crypto.randomUUID(),
       dateTime: dateTime,
+      password: password, // Store the password
     };
     setAttendanceRecords((prevRecords) => [...prevRecords, newRecord]);
+    toast({ // Add toast notification
+      title: "Attendance Recorded",
+      description: `Attendance for ${new Date(dateTime).toLocaleString()} marked successfully.`,
+    });
   };
 
   const deleteRecord = (id: string) => {
     setAttendanceRecords((prevRecords) => prevRecords.filter((record) => record.id !== id));
+     toast({ // Add toast notification for deletion
+      title: "Record Deleted",
+      description: "The attendance record has been removed.",
+      variant: "destructive", // Use destructive variant for deletion indication
+    });
   };
 
   return (
