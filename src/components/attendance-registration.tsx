@@ -1,39 +1,34 @@
+
 'use client';
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react'; // Import useCallback
+import { useState, useEffect } from 'react'; // Keep useEffect for key generation
 import { format } from 'date-fns';
-import { KeyRound, CalendarDays, Copy, WalletCards, BookOpen, Check, Loader2, AlertCircle, Wallet, MapPin, WifiOff } from 'lucide-react'; // Added MapPin, WifiOff
+import { KeyRound, CalendarDays, Copy, WalletCards, BookOpen, Check, Loader2, AlertCircle, Wallet } from 'lucide-react'; // Removed MapPin, WifiOff
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-// Ensure Card components are imported correctly
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Removed CardDescription (can be re-added if needed)
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface AttendanceRegistrationProps {
-  // Update onSubmit prop type to include optional location
+  // Simplified onSubmit prop - location is verified externally
   onSubmit: (
     dateTime: string,
     subject: string,
     password: string,
-    walletAddress: string | null,
-    latitude?: number,
-    longitude?: number
+    walletAddress: string | null
   ) => void;
+  // Props for passing verified location removed
+  // verifiedLatitude?: number | null;
+  // verifiedLongitude?: number | null;
 }
 
-// Location state type
-type LocationState = {
-    latitude: number | null;
-    longitude: number | null;
-    status: 'idle' | 'loading' | 'success' | 'error';
-    error: string | null;
-};
+// Location state and related logic removed
 
 // Updated subjects list with more engineering options
 const subjects = [
@@ -51,7 +46,7 @@ const subjects = [
   { value: 'eng-100', label: 'Introduction to Engineering Design' },
 ];
 
-// Simple key generation function (replace with secure backend generation)
+// Simple key generation function
 function generateDailyKey() {
   const datePart = format(new Date(), 'yyyyMMdd');
   const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -65,71 +60,14 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
   const [todaysGeneratedKey, setTodaysGeneratedKey] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { toast } = useToast();
-  const { account, connectWallet, isLoading: isWalletLoading, error: walletError } = useWalletConnection(); // Keep walletError for display
+  const { account, connectWallet, isLoading: isWalletLoading, error: walletError } = useWalletConnection();
 
-  // --- Location State ---
-  const [location, setLocation] = useState<LocationState>({
-      latitude: null,
-      longitude: null,
-      status: 'idle',
-      error: null,
-  });
+  // Location state and functions removed
 
-  // --- Function to get location ---
-  const getLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      setLocation({ status: 'error', error: 'Geolocation is not supported by your browser.', latitude: null, longitude: null });
-      toast({ title: 'Location Error', description: 'Geolocation not supported.', variant: 'destructive'});
-      return;
-    }
-
-    setLocation(prev => ({ ...prev, status: 'loading', error: null }));
-    console.log("Attempting to get location..."); // Debug log
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        console.log("Location success:", position.coords); // Debug log
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          status: 'success',
-          error: null,
-        });
-         toast({ title: 'Location Acquired', description: 'Your current location has been verified.'});
-      },
-      (error) => {
-        console.error("Location error:", error); // Debug log
-        let errorMessage = 'Unable to retrieve your location.';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Location permission denied. Please enable it in your browser settings.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information is unavailable.';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'The request to get user location timed out.';
-            break;
-          default:
-             errorMessage = `An unknown error occurred (Code: ${error.code}).`;
-             break;
-        }
-        setLocation({ status: 'error', error: errorMessage, latitude: null, longitude: null });
-        toast({ title: 'Location Error', description: errorMessage, variant: 'destructive'});
-      },
-      {
-        enableHighAccuracy: true, // Request more accurate position
-        timeout: 10000, // 10 seconds timeout
-        maximumAge: 0, // Don't use cached position
-      }
-    );
-  }, [toast]); // Add toast dependency
-
-  // Generate today's key and attempt to get location when the component mounts
+  // Generate today's key when the component mounts
   useEffect(() => {
-    setTodaysGeneratedKey(generateDailyKey()); // Replace with actual key fetching if needed
-    getLocation(); // Get location on initial load
-  }, [getLocation]); // Add getLocation dependency
+    setTodaysGeneratedKey(generateDailyKey());
+  }, []);
 
 
   const copyToClipboard = (textToCopy: string, message: string) => {
@@ -164,18 +102,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
       return;
     }
 
-    // 2. Check Location Status
-    if (location.status !== 'success' || location.latitude === null || location.longitude === null) {
-         toast({
-            title: "Location Not Ready",
-            description: location.error || "Location could not be verified. Please ensure permissions are granted and try again.",
-            variant: "destructive",
-        });
-        // Optionally offer a retry button:
-        // You could add a button here that calls `getLocation()` again.
-        return;
-    }
-
+    // 2. Location check removed (handled by parent/LocationVerifier)
 
     // 3. Check Subject Selection
     if (!selectedSubject) {
@@ -217,21 +144,19 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
         // Get current date and time
         const submissionDateTime = new Date().toISOString();
 
-        // Call the onSubmit prop passed from the parent, now including location
+        // Call the onSubmit prop passed from the parent (location no longer needed here)
         onSubmit(
             submissionDateTime,
             selectedSubject,
             dailyKeyInput, // The key is used as the password
-            account,
-            location.latitude, // Pass latitude
-            location.longitude // Pass longitude
+            account
+            // verifiedLatitude, // Removed
+            // verifiedLongitude // Removed
         );
 
         // Reset form fields after successful submission
         setSelectedSubject('');
         setDailyKeyInput('');
-        // Optionally reset location or require refresh? For now, keep it.
-        // getLocation(); // Re-fetch location for next potential submission
 
     } catch (err: any) {
         console.error("Submission error:", err);
@@ -254,7 +179,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
       </CardHeader>
       <CardContent className="p-6 space-y-6">
          <p className="text-sm text-muted-foreground">
-            Select your subject, enter the daily key, and ensure your location is verified to register attendance.
+            Your location is verified. Select your subject and enter the daily key to register.
          </p>
 
         {/* --- Today's Key Display --- */}
@@ -327,35 +252,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
              )}
         </div>
 
-        {/* --- Location Status Display --- */}
-        <div className="space-y-2">
-             <Label className="text-sm font-medium text-foreground">Location Status</Label>
-             <div className={cn(
-                "flex items-center gap-2 p-3 border rounded-md text-sm",
-                location.status === 'success' && "bg-green-100/50 border-green-300/50 text-green-800",
-                location.status === 'loading' && "bg-blue-100/50 border-blue-300/50 text-blue-800",
-                location.status === 'error' && "bg-destructive/10 border-destructive/30 text-destructive",
-                location.status === 'idle' && "bg-input text-muted-foreground"
-             )}>
-                 {location.status === 'loading' && <Loader2 className="h-4 w-4 animate-spin" />}
-                 {location.status === 'success' && <MapPin className="h-4 w-4 text-green-600" />}
-                 {location.status === 'error' && <WifiOff className="h-4 w-4" />}
-                 {location.status === 'idle' && <MapPin className="h-4 w-4 text-muted-foreground" />}
-
-                 <span className="flex-1">
-                    {location.status === 'loading' && 'Getting location...'}
-                    {location.status === 'success' && `Location verified (${location.latitude?.toFixed(4)}, ${location.longitude?.toFixed(4)})`}
-                    {location.status === 'error' && (location.error || 'Location error.')}
-                    {location.status === 'idle' && 'Waiting for location...'}
-                 </span>
-                 {/* Retry Button for Location Error */}
-                 {location.status === 'error' && (
-                     <Button variant="ghost" size="sm" onClick={getLocation} className="ml-auto h-7 text-xs text-destructive hover:bg-destructive/20">
-                         Retry
-                     </Button>
-                 )}
-             </div>
-        </div>
+        {/* --- Location Status Display Removed --- */}
 
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -400,7 +297,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground hover:opacity-90 transition-opacity duration-200"
-            disabled={isSubmitting || isWalletLoading || location.status !== 'success'} // Disable if submitting, wallet loading, or location not ready
+            disabled={isSubmitting || isWalletLoading} // Removed location status check from disabled condition
            >
              {isSubmitting ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -414,3 +311,4 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
     </Card>
   );
 }
+

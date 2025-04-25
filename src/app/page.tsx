@@ -4,11 +4,12 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { AttendanceRegistration } from '@/components/attendance-registration';
+import { LocationVerifier } from '@/components/location-verifier'; // Import LocationVerifier
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { ListChecks, ArrowRight, CheckSquare } from 'lucide-react'; // Added CheckSquare
+import { ListChecks, ArrowRight, CheckSquare, MapPin } from 'lucide-react'; // Added CheckSquare, MapPin
 
 export interface AttendanceRecord {
   id: string;
@@ -16,36 +17,8 @@ export interface AttendanceRecord {
   subject: string;
   password?: string;
   walletAddress: string | null;
-  latitude?: number; // Optional: Store location
-  longitude?: number; // Optional: Store location
-}
-
-// --- Location Configuration ---
-const ALLOWED_LOCATION = {
-    // Example: Los Angeles City Hall (replace with actual coordinates)
-    latitude: 30.00850268544767,
-    longitude: 77.76385663463411,
-};
-const MAX_DISTANCE_KM = 10; // 10000 meters allowed radius
-
-// --- Helper Functions ---
-
-// Haversine formula to calculate distance between two points on Earth
-function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const d = R * c; // Distance in km
-  return d;
-}
-
-function deg2rad(deg: number): number {
-  return deg * (Math.PI / 180);
+  latitude?: number; // Store location
+  longitude?: number; // Store location
 }
 
 // Helper function to get subject label
@@ -72,64 +45,58 @@ function getSubjectLabel(value: string): string {
 
 export default function Home() {
   const [attendanceRecords, setAttendanceRecords] = useLocalStorage<AttendanceRecord[]>('attendanceRecords', []);
+  const [isLocationVerified, setIsLocationVerified] = React.useState(false); // State for location verification
+  const [verifiedLocation, setVerifiedLocation] = React.useState<{ latitude: number | null, longitude: number | null }>({ latitude: null, longitude: null }); // Store verified location
   const { toast } = useToast();
 
-  // Updated addRecord to accept location and perform validation
+
+  const handleLocationVerified = (lat: number, lon: number) => {
+    setVerifiedLocation({ latitude: lat, longitude: lon });
+    setIsLocationVerified(true);
+    toast({
+        title: "Location Verified",
+        description: "You can now proceed to register your attendance.",
+        variant: "default",
+    });
+  };
+
+  // Updated addRecord to accept location from verified state
   const addRecord = (
     dateTime: string,
     subject: string,
     password: string,
     walletAddress: string | null,
-    latitude?: number,
-    longitude?: number
+    // Removed latitude/longitude from args, will use verifiedLocation state
   ) => {
 
-    // 1. Location Validation (Client-side - for demo purposes)
-    if (latitude === undefined || longitude === undefined) {
+     if (!isLocationVerified || verifiedLocation.latitude === null || verifiedLocation.longitude === null) {
         toast({
-            title: "Location Missing",
-            description: "Could not verify location. Please ensure location services are enabled and permission is granted.",
+            title: "Verification Error",
+            description: "Location is not verified. Please verify your location first.",
             variant: "destructive",
         });
-        return; // Stop if location is missing
-    }
+        // Optional: redirect or reset state if needed
+        setIsLocationVerified(false);
+        return;
+     }
 
-    const distance = getDistanceFromLatLonInKm(
-        latitude,
-        longitude,
-        ALLOWED_LOCATION.latitude,
-        longitude,
-        ALLOWED_LOCATION.longitude
-    );
-
-    console.log(`Distance from allowed location: ${distance.toFixed(4)} km`); // For debugging
-
-    if (distance > MAX_DISTANCE_KM) {
-        toast({
-            title: "Location Out of Range",
-            description: `You must be within ${MAX_DISTANCE_KM * 1000} meters of the allowed location to register attendance.`,
-            variant: "destructive",
-        });
-        return; // Stop if too far
-    }
-
-    // 2. If location is valid, create and save the record
+    // Create and save the record using verified location
     const newRecord: AttendanceRecord = {
       id: crypto.randomUUID(),
       dateTime: dateTime,
       subject: subject,
       password: password,
       walletAddress: walletAddress,
-      latitude: latitude, // Save location
-      longitude: longitude, // Save location
+      latitude: verifiedLocation.latitude, // Use verified location
+      longitude: verifiedLocation.longitude, // Use verified location
     };
 
     setAttendanceRecords((prevRecords) => [newRecord, ...prevRecords]);
 
     toast({
       title: "Attendance Registered",
-      description: `Attendance for ${getSubjectLabel(subject)} at ${new Date(dateTime).toLocaleString()} marked successfully (Location Verified).`,
-      variant: "default", // Use default (success) variant
+      description: `Attendance for ${getSubjectLabel(subject)} at ${new Date(dateTime).toLocaleString()} marked successfully.`,
+      variant: "default",
     });
   };
 
@@ -147,34 +114,48 @@ export default function Home() {
           </p>
         </div>
 
+      {/* Step 1: Location Verification */}
+      {!isLocationVerified && (
+         <LocationVerifier onVerified={handleLocationVerified} />
+      )}
 
-      {/* Render the AttendanceRegistration component */}
-      <AttendanceRegistration onSubmit={addRecord} />
 
-      {/* Separator */}
-      <Separator className="my-6 w-full max-w-md" /> {/* Shortened separator */}
+      {/* Step 2: Attendance Registration (conditional) */}
+      {isLocationVerified && (
+          <>
+             {/* Render the AttendanceRegistration component */}
+            <AttendanceRegistration
+               onSubmit={addRecord}
+               // Pass verified location down if needed, though addRecord now uses state
+               // verifiedLatitude={verifiedLocation.latitude}
+               // verifiedLongitude={verifiedLocation.longitude}
+            />
 
-      {/* Attendance Log Link Bar */}
-      <div className="w-full max-w-lg space-y-4">
-         {/* Styled Div Bar for Attendance Log Title and Link */}
-         <div className="flex flex-col sm:flex-row items-center justify-between bg-card border border-border p-4 rounded-lg shadow-sm text-left"> {/* Adjusted background and layout */}
-            <div className="flex items-center gap-2 mb-3 sm:mb-0">
-                <ListChecks className="h-5 w-5 text-primary" />
-                <div>
-                    <h2 className="text-lg font-semibold text-card-foreground">Attendance Log</h2>
-                    <p className="text-sm text-muted-foreground">View all your past entries.</p>
+             {/* Separator */}
+            <Separator className="my-6 w-full max-w-md" /> {/* Shortened separator */}
+
+             {/* Attendance Log Link Bar */}
+            <div className="w-full max-w-lg space-y-4">
+                {/* Styled Div Bar for Attendance Log Title and Link */}
+                <div className="flex flex-col sm:flex-row items-center justify-between bg-card border border-border p-4 rounded-lg shadow-sm text-left"> {/* Adjusted background and layout */}
+                    <div className="flex items-center gap-2 mb-3 sm:mb-0">
+                        <ListChecks className="h-5 w-5 text-primary" />
+                        <div>
+                            <h2 className="text-lg font-semibold text-card-foreground">Attendance Log</h2>
+                            <p className="text-sm text-muted-foreground">View all your past entries.</p>
+                        </div>
+                    </div>
+                    <Link href="/log" passHref>
+                        <Button variant="outline" size="sm" className="w-full sm:w-auto"> {/* Changed variant */}
+                        View Full Log <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </Link>
                 </div>
             </div>
-             <Link href="/log" passHref>
-                <Button variant="outline" size="sm" className="w-full sm:w-auto"> {/* Changed variant */}
-                   View Full Log <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-             </Link>
-         </div>
-      </div>
+          </>
+      )}
+
     </main>
   );
 }
-
-
 
