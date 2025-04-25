@@ -3,14 +3,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react'; // Import Loader icon
+import { ArrowRightSquare } from 'lucide-react'; // Using the brand icon from Navbar
 
 interface SplashScreenProps {
   children: React.ReactNode;
 }
 
 // Duration of the splash screen in milliseconds
-const SPLASH_DURATION = 3000; // 3 seconds
+const SPLASH_DURATION = 2500; // 2.5 seconds (adjusted slightly)
 
 export function SplashScreen({ children }: SplashScreenProps) {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +29,7 @@ export function SplashScreen({ children }: SplashScreenProps) {
       {isLoading && (
         <div
           className={cn(
-            'fixed inset-0 z-[100] flex items-center justify-center bg-background transition-opacity duration-500 ease-out',
+            'fixed inset-0 z-[100] flex items-center justify-center bg-primary transition-opacity duration-500 ease-out', // Use primary background
             isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none' // Fade out animation
           )}
         >
@@ -46,12 +46,10 @@ export function SplashScreen({ children }: SplashScreenProps) {
               onEnded={() => setIsLoading(false)} // Optionally end splash when video ends
             />
            */}
-           <div className="w-full h-full flex flex-col items-center justify-center bg-primary text-primary-foreground">
-             {/* Simple loading indicator */}
-             <Loader2 className="h-12 w-12 animate-spin mb-4" />
-             <p className="text-xl font-medium animate-pulse">
-                Loading...
-             </p>
+           <div className="w-full h-full flex flex-col items-center justify-center text-primary-foreground">
+             {/* Brand Icon with pulse animation */}
+             <ArrowRightSquare className="h-16 w-16 animate-pulse" />
+
              {/* Or use an actual video tag if you have one */}
              {/*
              <video
