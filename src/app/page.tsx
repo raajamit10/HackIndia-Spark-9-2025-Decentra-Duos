@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -14,6 +13,7 @@ export interface AttendanceRecord {
   id: string;
   dateTime: string;
   subject: string;
+  password?: string;
   walletAddress: string | null;
   latitude?: number; // Optional: Store location
   longitude?: number; // Optional: Store location
@@ -77,6 +77,7 @@ export default function Home() {
   const addRecord = (
     dateTime: string,
     subject: string,
+    password: string,
     walletAddress: string | null,
     latitude?: number,
     longitude?: number
@@ -115,6 +116,7 @@ export default function Home() {
       id: crypto.randomUUID(),
       dateTime: dateTime,
       subject: subject,
+      password: password,
       walletAddress: walletAddress,
       latitude: latitude, // Save location
       longitude: longitude, // Save location

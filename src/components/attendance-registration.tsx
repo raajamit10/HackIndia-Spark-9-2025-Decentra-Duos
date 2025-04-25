@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -21,6 +20,7 @@ interface AttendanceRegistrationProps {
   onSubmit: (
     dateTime: string,
     subject: string,
+    password: string,
     walletAddress: string | null,
     latitude?: number,
     longitude?: number
@@ -221,6 +221,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
         onSubmit(
             submissionDateTime,
             selectedSubject,
+            dailyKeyInput, // The key is used as the password
             account,
             location.latitude, // Pass latitude
             location.longitude // Pass longitude
@@ -413,4 +414,3 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
     </Card>
   );
 }
-
