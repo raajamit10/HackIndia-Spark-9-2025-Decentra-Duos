@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google'; // Use Inter font
 import './globals.css';
@@ -19,11 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased flex flex-col min-h-screen`}> {/* Apply Inter font and flex layout */}
-        <Navbar /> {/* Add Navbar */}
-        <div className="flex-grow"> {/* Ensure content takes remaining space */}
-          {children}
-        </div>
-        <Toaster /> {/* Add Toaster component */}
+        {/* No specific provider needed for this hook, but keep structure for future */}
+          <Navbar /> {/* Add Navbar */}
+          <div className="flex-grow"> {/* Ensure content takes remaining space */}
+            {children}
+          </div>
+          <Toaster /> {/* Add Toaster component */}
       </body>
     </html>
   );
