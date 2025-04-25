@@ -3,14 +3,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { LogIn, FileText, ArrowRightSquare } from 'lucide-react'; // Removed Wallet, LogOut, Loader2, Coins, CheckCircle
+import { LogIn, FileText, ArrowRightSquare, Wallet, User } from 'lucide-react'; // Added Wallet, User
 import { Button } from '@/components/ui/button';
-// Removed useWalletConnection import
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-// Removed Skeleton import
+import { useLocalStorage } from '@/hooks/use-local-storage'; // Import useLocalStorage
 
 export function Navbar() {
-  // Removed useWalletConnection hook call
+  const [userWalletAddress] = useLocalStorage<string | null>('userWalletAddress', null); // Check if wallet address exists
 
   return (
     <nav className="bg-primary text-primary-foreground shadow-md sticky top-0 z-50">
@@ -42,24 +41,33 @@ export function Navbar() {
               </TooltipProvider>
 
 
-             {/* Sign In button */}
+             {/* Conditional Sign In / Wallet Button */}
              <TooltipProvider delayDuration={100}>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <Link href="/signin" passHref>
-                        <Button variant="ghost" size="sm" className="hover:bg-primary/80 hover:text-primary-foreground text-primary-foreground px-2 sm:px-3">
-                            <LogIn className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Sign In</span>
-                        </Button>
-                        </Link>
+                        {userWalletAddress ? (
+                            // Show Wallet link if signed in
+                            <Link href="/wallet" passHref>
+                            <Button variant="ghost" size="sm" className="hover:bg-primary/80 hover:text-primary-foreground text-primary-foreground px-2 sm:px-3">
+                                <Wallet className="h-4 w-4 sm:mr-2" /> {/* Wallet icon */}
+                                <span className="hidden sm:inline">Wallet</span>
+                            </Button>
+                            </Link>
+                        ) : (
+                             // Show Sign In link if not signed in
+                            <Link href="/signin" passHref>
+                            <Button variant="ghost" size="sm" className="hover:bg-primary/80 hover:text-primary-foreground text-primary-foreground px-2 sm:px-3">
+                                <LogIn className="h-4 w-4 sm:mr-2" />
+                                <span className="hidden sm:inline">Sign In</span>
+                            </Button>
+                            </Link>
+                         )}
                     </TooltipTrigger>
                      <TooltipContent>
-                      <p>Sign in to your account</p>
+                        {userWalletAddress ? <p>Manage Wallet Connection</p> : <p>Sign in to your account</p>}
                   </TooltipContent>
                 </Tooltip>
              </TooltipProvider>
-
-             {/* Removed Wallet Button/Status Section */}
 
           </div>
         </div>
