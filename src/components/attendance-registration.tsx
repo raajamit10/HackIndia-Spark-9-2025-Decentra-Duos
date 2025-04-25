@@ -20,12 +20,20 @@ interface AttendanceRegistrationProps {
   onSubmit: (dateTime: string, subject: string, walletAddress: string | null) => void;
 }
 
-// Example subjects - replace with actual data source if needed
+// Updated subjects list with more engineering options
 const subjects = [
-  { value: 'math-101', label: 'Mathematics 101' },
-  { value: 'phys-202', label: 'Physics 202' },
-  { value: 'chem-301', label: 'Chemistry 301' },
-  { value: 'hist-110', label: 'History 110' },
+  { value: 'math-101', label: 'Calculus I' },
+  { value: 'phys-202', label: 'Physics for Engineers' },
+  { value: 'chem-301', label: 'General Chemistry' },
+  { value: 'cs-101', label: 'Intro to Computer Science' },
+  { value: 'ee-201', label: 'Circuit Theory I' },
+  { value: 'me-301', label: 'Thermodynamics' },
+  { value: 'ce-201', label: 'Statics' },
+  { value: 'cs-305', label: 'Data Structures & Algorithms' },
+  { value: 'ee-302', label: 'Signals and Systems' },
+  { value: 'me-302', label: 'Fluid Mechanics' },
+  { value: 'ce-302', label: 'Structural Analysis' },
+  { value: 'eng-100', label: 'Introduction to Engineering Design' },
 ];
 
 // Simple key generation function (replace with secure backend generation)

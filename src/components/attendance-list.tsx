@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -22,11 +23,20 @@ interface AttendanceListProps {
 }
 
 // Helper to find subject label from value (can be moved to a shared util if needed)
+// Ensure this list matches the one in attendance-registration.tsx
 const subjects = [
-  { value: 'math-101', label: 'Mathematics 101' },
-  { value: 'phys-202', label: 'Physics 202' },
-  { value: 'chem-301', label: 'Chemistry 301' },
-  { value: 'hist-110', label: 'History 110' },
+  { value: 'math-101', label: 'Calculus I' },
+  { value: 'phys-202', label: 'Physics for Engineers' },
+  { value: 'chem-301', label: 'General Chemistry' },
+  { value: 'cs-101', label: 'Intro to Computer Science' },
+  { value: 'ee-201', label: 'Circuit Theory I' },
+  { value: 'me-301', label: 'Thermodynamics' },
+  { value: 'ce-201', label: 'Statics' },
+  { value: 'cs-305', label: 'Data Structures & Algorithms' },
+  { value: 'ee-302', label: 'Signals and Systems' },
+  { value: 'me-302', label: 'Fluid Mechanics' },
+  { value: 'ce-302', label: 'Structural Analysis' },
+  { value: 'eng-100', label: 'Introduction to Engineering Design' },
 ];
 
 function getSubjectLabel(value: string): string {
@@ -38,16 +48,16 @@ function getSubjectLabel(value: string): string {
 export function AttendanceList({ records, onDelete }: AttendanceListProps) {
   return (
     <Card className="shadow-lg rounded-lg border bg-card text-card-foreground">
-      <CardHeader>
+      {/* CardHeader removed to match the requested UI in page.tsx */}
+      {/* <CardHeader>
         <div className="flex items-center justify-between">
            <CardTitle className="text-xl font-bold flex items-center gap-2">
              <ListChecks className="h-5 w-5 text-primary" /> Attendance Log
            </CardTitle>
-           {/* Optional: Add filtering or export controls here */}
         </div>
          <CardDescription>A list of your recent attendance records.</CardDescription>
-      </CardHeader>
-      <CardContent>
+      </CardHeader> */}
+      <CardContent className="pt-4"> {/* Added padding-top since header is removed */}
         {records.length === 0 ? (
            <div className="text-center py-10 text-muted-foreground flex flex-col items-center gap-2">
               <Info className="h-6 w-6" />
