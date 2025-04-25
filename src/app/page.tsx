@@ -4,21 +4,22 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { AttendanceRegistration } from '@/components/attendance-registration';
-import { LocationVerifier } from '@/components/location-verifier'; // Import LocationVerifier
+import { LocationVerifier } from '@/components/location-verifier';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { ListChecks, ArrowRight, CheckSquare, MapPin } from 'lucide-react'; // Added CheckSquare, MapPin
+import { ListChecks, ArrowRight, CheckSquare, MapPin } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // Import useRouter for redirection
 
 export interface AttendanceRecord {
   id: string;
   dateTime: string;
   subject: string;
-  password?: string;
-  walletAddress: string | null;
-  latitude?: number; // Store location
-  longitude?: number; // Store location
+  password?: string; // Daily key used as password
+  walletAddress: string; // Changed from string | null
+  latitude?: number;
+  longitude?: number;
 }
 
 // Helper function to get subject label
@@ -45,10 +46,23 @@ function getSubjectLabel(value: string): string {
 
 export default function Home() {
   const [attendanceRecords, setAttendanceRecords] = useLocalStorage<AttendanceRecord[]>('attendanceRecords', []);
-  const [isLocationVerified, setIsLocationVerified] = React.useState(false); // State for location verification
-  const [verifiedLocation, setVerifiedLocation] = React.useState<{ latitude: number | null, longitude: number | null }>({ latitude: null, longitude: null }); // Store verified location
+  const [userWalletAddress] = useLocalStorage<string | null>('userWalletAddress', null); // Retrieve wallet address
+  const [isLocationVerified, setIsLocationVerified] = React.useState(false);
+  const [verifiedLocation, setVerifiedLocation] = React.useState<{ latitude: number | null, longitude: number | null }>({ latitude: null, longitude: null });
   const { toast } = useToast();
+  const router = useRouter();
 
+  // Redirect to sign-in if wallet address is not found in local storage
+  React.useEffect(() => {
+    if (userWalletAddress === null) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in and connect your wallet first.",
+        variant: "destructive",
+      });
+      router.push('/signin');
+    }
+  }, [userWalletAddress, router, toast]);
 
   const handleLocationVerified = (lat: number, lon: number) => {
     setVerifiedLocation({ latitude: lat, longitude: lon });
@@ -60,14 +74,22 @@ export default function Home() {
     });
   };
 
-  // Updated addRecord to accept location from verified state
   const addRecord = (
     dateTime: string,
     subject: string,
     password: string,
-    walletAddress: string | null,
-    // Removed latitude/longitude from args, will use verifiedLocation state
+    // walletAddress is now fetched from local storage, not passed here
   ) => {
+
+     if (!userWalletAddress) {
+        toast({
+            title: "Authentication Error",
+            description: "Wallet address not found. Please sign in again.",
+            variant: "destructive",
+        });
+        router.push('/signin');
+        return;
+     }
 
      if (!isLocationVerified || verifiedLocation.latitude === null || verifiedLocation.longitude === null) {
         toast({
@@ -75,20 +97,19 @@ export default function Home() {
             description: "Location is not verified. Please verify your location first.",
             variant: "destructive",
         });
-        // Optional: redirect or reset state if needed
         setIsLocationVerified(false);
         return;
      }
 
-    // Create and save the record using verified location
+    // Create and save the record using verified location and stored wallet address
     const newRecord: AttendanceRecord = {
       id: crypto.randomUUID(),
       dateTime: dateTime,
       subject: subject,
       password: password,
-      walletAddress: walletAddress,
-      latitude: verifiedLocation.latitude, // Use verified location
-      longitude: verifiedLocation.longitude, // Use verified location
+      walletAddress: userWalletAddress, // Use address from local storage
+      latitude: verifiedLocation.latitude,
+      longitude: verifiedLocation.longitude,
     };
 
     setAttendanceRecords((prevRecords) => [newRecord, ...prevRecords]);
@@ -100,12 +121,19 @@ export default function Home() {
     });
   };
 
+  // Prevent rendering content until wallet address is confirmed
+  if (userWalletAddress === null) {
+      // Optionally show a loading state or just return null while redirecting
+      return (
+         <main className="flex flex-grow flex-col items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-background text-center space-y-10">
+            <p className="text-muted-foreground">Redirecting to sign-in...</p>
+         </main>
+      );
+  }
+
   return (
-    // Use flex container with flex-col, center items, and adjust padding
-    // Add animation classes: animate-in, fade-in-0, slide-in-from-top-4
     <main className="flex flex-grow flex-col items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-background text-center space-y-10 animate-in fade-in-0 slide-in-from-top-4 duration-500 ease-out">
 
-       {/* Introductory Text */}
        <div className="max-w-2xl">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-primary flex items-center justify-center gap-2">
               <CheckSquare className="h-8 w-8" /> BlockAttend
@@ -121,24 +149,21 @@ export default function Home() {
       )}
 
 
-      {/* Step 2: Attendance Registration (conditional) */}
-      {isLocationVerified && (
+      {/* Step 2: Attendance Registration (conditional on location and wallet address) */}
+      {isLocationVerified && userWalletAddress && (
           <>
              {/* Render the AttendanceRegistration component */}
             <AttendanceRegistration
                onSubmit={addRecord}
-               // Pass verified location down if needed, though addRecord now uses state
-               // verifiedLatitude={verifiedLocation.latitude}
-               // verifiedLongitude={verifiedLocation.longitude}
+               walletAddress={userWalletAddress} // Pass wallet address as prop
             />
 
              {/* Separator */}
-            <Separator className="my-6 w-full max-w-md" /> {/* Shortened separator */}
+            <Separator className="my-6 w-full max-w-md" />
 
              {/* Attendance Log Link Bar */}
             <div className="w-full max-w-lg space-y-4">
-                {/* Styled Div Bar for Attendance Log Title and Link */}
-                <div className="flex flex-col sm:flex-row items-center justify-between bg-card border border-border p-4 rounded-lg shadow-sm text-left"> {/* Adjusted background and layout */}
+                <div className="flex flex-col sm:flex-row items-center justify-between bg-card border border-border p-4 rounded-lg shadow-sm text-left">
                     <div className="flex items-center gap-2 mb-3 sm:mb-0">
                         <ListChecks className="h-5 w-5 text-primary" />
                         <div>
@@ -147,7 +172,7 @@ export default function Home() {
                         </div>
                     </div>
                     <Link href="/log" passHref>
-                        <Button variant="outline" size="sm" className="w-full sm:w-auto"> {/* Changed variant */}
+                        <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         View Full Log <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </Link>
@@ -159,4 +184,3 @@ export default function Home() {
     </main>
   );
 }
-

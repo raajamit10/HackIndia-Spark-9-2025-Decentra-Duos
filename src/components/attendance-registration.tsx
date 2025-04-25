@@ -2,35 +2,29 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useEffect } from 'react'; // Keep useEffect for key generation
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { KeyRound, CalendarDays, Copy, WalletCards, BookOpen, Check, Loader2, AlertCircle, Wallet } from 'lucide-react'; // Removed MapPin, WifiOff
+import { KeyRound, CalendarDays, Copy, WalletCards, BookOpen, Check, Loader2, AlertCircle, Wallet } from 'lucide-react'; // Added Wallet
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Removed CardDescription (can be re-added if needed)
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useWalletConnection } from '@/hooks/useWalletConnection';
+// Removed useWalletConnection import
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface AttendanceRegistrationProps {
-  // Simplified onSubmit prop - location is verified externally
   onSubmit: (
     dateTime: string,
     subject: string,
-    password: string,
-    walletAddress: string | null
+    password: string, // The daily key
+    // walletAddress is now fetched from parent/local storage
   ) => void;
-  // Props for passing verified location removed
-  // verifiedLatitude?: number | null;
-  // verifiedLongitude?: number | null;
+  walletAddress: string; // Accept wallet address as a prop
 }
 
-// Location state and related logic removed
-
-// Updated subjects list with more engineering options
 const subjects = [
   { value: 'math-101', label: 'Calculus I' },
   { value: 'phys-202', label: 'Physics for Engineers' },
@@ -46,7 +40,6 @@ const subjects = [
   { value: 'eng-100', label: 'Introduction to Engineering Design' },
 ];
 
-// Simple key generation function
 function generateDailyKey() {
   const datePart = format(new Date(), 'yyyyMMdd');
   const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -54,17 +47,14 @@ function generateDailyKey() {
 }
 
 
-export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps) {
+export function AttendanceRegistration({ onSubmit, walletAddress }: AttendanceRegistrationProps) {
   const [dailyKeyInput, setDailyKeyInput] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [todaysGeneratedKey, setTodaysGeneratedKey] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { toast } = useToast();
-  const { account, connectWallet, isLoading: isWalletLoading, error: walletError } = useWalletConnection();
+  // Removed wallet connection state (account, connectWallet, isWalletLoading, walletError)
 
-  // Location state and functions removed
-
-  // Generate today's key when the component mounts
   useEffect(() => {
     setTodaysGeneratedKey(generateDailyKey());
   }, []);
@@ -92,19 +82,18 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Check Wallet Connection
-    if (!account) {
+    // 1. Wallet Address Check (already passed as prop)
+    if (!walletAddress) {
       toast({
-        title: "Wallet Not Connected",
-        description: "Please connect your wallet to register attendance.",
+        title: "Wallet Not Found",
+        description: "Wallet address is missing. Please sign in again.",
         variant: "destructive",
       });
+      // Consider redirecting or handling appropriately
       return;
     }
 
-    // 2. Location check removed (handled by parent/LocationVerifier)
-
-    // 3. Check Subject Selection
+    // 2. Subject Selection Check
     if (!selectedSubject) {
       toast({
         title: "Subject Not Selected",
@@ -114,7 +103,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
       return;
     }
 
-    // 4. Check Daily Key Input
+    // 3. Daily Key Input Check
     if (!dailyKeyInput) {
        toast({
         title: "Daily Key Required",
@@ -124,7 +113,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
       return;
     }
 
-    // 5. Validate Daily Key (Basic comparison - replace with backend validation)
+    // 4. Validate Daily Key
     if (dailyKeyInput !== todaysGeneratedKey) {
         toast({
             title: "Invalid Daily Key",
@@ -135,26 +124,20 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
     }
 
 
-    setIsSubmitting(true); // Start loading indicator
+    setIsSubmitting(true);
 
     try {
-        // Simulate submission delay (replace with actual API call)
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Get current date and time
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate submission
         const submissionDateTime = new Date().toISOString();
 
-        // Call the onSubmit prop passed from the parent (location no longer needed here)
+        // Call the onSubmit prop (walletAddress is now handled by parent)
         onSubmit(
             submissionDateTime,
             selectedSubject,
-            dailyKeyInput, // The key is used as the password
-            account
-            // verifiedLatitude, // Removed
-            // verifiedLongitude // Removed
+            dailyKeyInput // The key is used as the password
+            // walletAddress is implicitly included via parent's scope
         );
 
-        // Reset form fields after successful submission
         setSelectedSubject('');
         setDailyKeyInput('');
 
@@ -166,15 +149,14 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
             variant: "destructive",
         });
     } finally {
-        setIsSubmitting(false); // Stop loading indicator
+        setIsSubmitting(false);
     }
   };
 
-  // Return JSX for the component
   return (
     <Card className="w-full max-w-lg shadow-xl rounded-lg border-none bg-card text-card-foreground overflow-hidden">
       <CardHeader className="bg-gradient-to-br from-primary-gradient-start to-primary-gradient-end text-primary-foreground rounded-t-lg p-4 flex flex-row justify-between items-center">
-        <CardTitle className="text-lg font-bold">Attendance Registration</CardTitle> {/* Added font-bold */}
+        <CardTitle className="text-lg font-bold">Attendance Registration</CardTitle>
          <KeyRound className="h-5 w-5" />
       </CardHeader>
       <CardContent className="p-6 space-y-6">
@@ -216,22 +198,20 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
 
          {/* --- Wallet Address Display --- */}
         <div className="space-y-2">
-             <Label className="text-sm font-medium text-foreground">Connected Wallet Address</Label>
+             <Label className="text-sm font-medium text-foreground">Registered Wallet Address</Label>
              <div className="flex items-center gap-2 p-3 border rounded-md bg-input text-sm text-muted-foreground">
                  <WalletCards className="h-4 w-4 text-primary" />
-                 {isWalletLoading ? (
-                     <Skeleton className="h-4 w-48" />
-                 ) : account ? (
-                     <span className="truncate font-mono text-foreground flex-1">{account}</span>
+                 {walletAddress ? (
+                     <span className="truncate font-mono text-foreground flex-1">{walletAddress}</span>
                  ) : (
-                     <span className="italic flex-1">Not connected</span>
+                     <span className="italic flex-1 text-destructive">Wallet address not found. Please sign in.</span>
                  )}
-                 {account && (
+                 {walletAddress && (
                    <Button
                      type="button"
                      variant="ghost"
                      size="icon"
-                     onClick={() => copyToClipboard(account, "Wallet address copied!")}
+                     onClick={() => copyToClipboard(walletAddress, "Wallet address copied!")}
                      className="ml-auto h-7 w-7 text-muted-foreground hover:text-primary flex-shrink-0"
                      aria-label="Copy Wallet Address"
                    >
@@ -239,20 +219,8 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
                    </Button>
                  )}
              </div>
-             {!account && !isWalletLoading && (
-                 <Button variant="outline" size="sm" onClick={connectWallet} className="mt-2 w-full sm:w-auto">
-                     <Wallet className="mr-2 h-4 w-4"/> Connect Wallet
-                 </Button>
-             )}
-             {walletError && (
-                 <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/30 mt-2">
-                   <AlertCircle className="h-4 w-4" />
-                   <span>Wallet Error: {walletError}</span>
-                 </div>
-             )}
+             {/* Removed connect wallet button and error display */}
         </div>
-
-        {/* --- Location Status Display Removed --- */}
 
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -297,7 +265,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground hover:opacity-90 transition-opacity duration-200"
-            disabled={isSubmitting || isWalletLoading} // Removed location status check from disabled condition
+            disabled={isSubmitting || !walletAddress} // Disable if submitting or wallet address is missing
            >
              {isSubmitting ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -311,4 +279,3 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
     </Card>
   );
 }
-
