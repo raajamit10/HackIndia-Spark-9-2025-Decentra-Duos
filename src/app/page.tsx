@@ -28,10 +28,12 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-12 lg:p-24 bg-secondary">
-      <Card className="w-full max-w-2xl shadow-lg rounded-lg">
+    // Removed min-h-screen and added pt-4 to account for navbar height (adjust as needed)
+    <main className="flex flex-col items-center p-4 sm:p-8 md:p-12 lg:p-24 bg-secondary">
+      <Card className="w-full max-w-2xl shadow-lg rounded-lg mt-4"> {/* Added top margin */}
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-primary">Blockendance</CardTitle>
+          {/* Removed Blockendance title from here as it's in the navbar */}
+          {/* <CardTitle className="text-3xl font-bold text-primary">Blockendance</CardTitle> */}
         </CardHeader>
         <CardContent>
           <AttendanceForm onSubmit={addRecord} />
