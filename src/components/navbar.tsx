@@ -14,6 +14,7 @@ export function Navbar() {
 
   const formatAddress = (address: string | null): string => {
     if (!address) return '';
+    // Shorten the address: display first 6 and last 4 characters
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
@@ -36,6 +37,7 @@ export function Navbar() {
                    {account ? (
                      <Button variant="secondary" size="sm" onClick={disconnectWallet} className="flex items-center gap-2">
                        <Wallet className="h-4 w-4 text-green-500" /> {/* Indicate connected state */}
+                       {/* Display shortened address */}
                        <span>{formatAddress(account)}</span>
                        <span className="text-xs text-muted-foreground">(</span>
                        <Coins className="h-3 w-3 text-accent" />
@@ -71,6 +73,7 @@ export function Navbar() {
                          <CheckCircle className="h-4 w-4" />
                          <span>Status: Connected</span>
                        </div>
+                       {/* Show full address in tooltip */}
                        <p>Account: {account}</p>
                        <div className="flex items-center gap-1">
                          <Coins className="h-4 w-4 text-accent" />
