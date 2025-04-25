@@ -25,7 +25,7 @@ const ALLOWED_LOCATION = {
     latitude: 34.0522,
     longitude: -118.2437,
 };
-const MAX_DISTANCE_KM = 0.25; // 250 meters allowed radius
+const MAX_DISTANCE_KM = 10; // 10000 meters allowed radius
 
 // --- Helper Functions ---
 
@@ -174,4 +174,5 @@ export default function Home() {
     </main>
   );
 }
+
 
