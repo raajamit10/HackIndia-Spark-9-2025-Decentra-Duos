@@ -102,7 +102,8 @@ export default function Home() {
 
   return (
     // Use flex container with flex-col, center items, and adjust padding
-    <main className="flex flex-grow flex-col items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-background text-center space-y-10">
+    // Add animation classes: animate-in, fade-in-0, slide-in-from-top-4
+    <main className="flex flex-grow flex-col items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-background text-center space-y-10 animate-in fade-in-0 slide-in-from-top-4 duration-500 ease-out">
 
        {/* Introductory Text */}
        <div className="max-w-2xl">
