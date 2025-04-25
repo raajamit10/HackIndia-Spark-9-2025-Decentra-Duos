@@ -5,9 +5,10 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
-import { Wallet, LogOut, Loader2, AlertCircle, Coins } from 'lucide-react'; // Import Coins icon
+import { Wallet, LogOut, Loader2, AlertCircle, Coins, ArrowLeft } from 'lucide-react'; // Import ArrowLeft icon
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
+import Link from 'next/link'; // Import Link
 
 export default function WalletPage() {
   const { connectWallet, disconnectWallet, account, provider, balance, error, isLoading } = useWalletConnection();
@@ -77,8 +78,18 @@ export default function WalletPage() {
               <span>Error: {error}</span>
             </div>
           )}
+
+           {/* Go Back Button */}
+           <div className="mt-4 text-center border-t pt-4">
+            <Link href="/" passHref>
+              <Button variant="ghost" className="w-full text-muted-foreground">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Go Back to Home
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </main>
   );
 }
+
