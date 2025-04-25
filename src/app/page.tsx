@@ -1,82 +1,91 @@
+
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link'; // Import Link
-import { AttendanceRegistration } from '@/components/attendance-registration'; // Import the new component
-// import { AttendanceList } from '@/components/attendance-list'; // Remove AttendanceList import
+import Link from 'next/link';
+import { AttendanceRegistration } from '@/components/attendance-registration';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
-import { Separator } from '@/components/ui/separator'; // Import Separator
-import { Button } from '@/components/ui/button'; // Import Button
-import { ListChecks, ArrowRight } from 'lucide-react'; // Import icons
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { ListChecks, ArrowRight, CheckSquare } from 'lucide-react'; // Added CheckSquare
 
 export interface AttendanceRecord {
-  id: string; // Keep the ID for potential future use (like viewing logs)
+  id: string;
   dateTime: string;
-  subject: string; // Add subject
-  walletAddress: string | null; // Store the wallet address used for registration
+  subject: string;
+  walletAddress: string | null;
 }
 
 export default function Home() {
-  // Keep state for adding records, but don't display the list here
   const [attendanceRecords, setAttendanceRecords] = useLocalStorage<AttendanceRecord[]>('attendanceRecords', []);
   const { toast } = useToast();
 
-  // Updated function to add a record, now includes subject and wallet address
   const addRecord = (dateTime: string, subject: string, walletAddress: string | null) => {
     const newRecord: AttendanceRecord = {
-      id: crypto.randomUUID(), // Generate unique ID for the record itself
+      id: crypto.randomUUID(),
       dateTime: dateTime,
       subject: subject,
       walletAddress: walletAddress,
     };
-    setAttendanceRecords((prevRecords) => [newRecord, ...prevRecords]); // Add new records to the top
+    setAttendanceRecords((prevRecords) => [newRecord, ...prevRecords]);
     toast({
       title: "Attendance Registered",
-      description: `Attendance for ${getSubjectLabel(subject)} at ${new Date(dateTime).toLocaleString()} marked successfully.`, // Use getSubjectLabel here too
-      variant: "default", // Use default style for success
+      description: `Attendance for ${getSubjectLabel(subject)} at ${new Date(dateTime).toLocaleString()} marked successfully.`,
+      variant: "default",
     });
   };
 
-  // Delete record function is removed as the list is not displayed here
-
   return (
-    // Use flex container with flex-col to stack components
-    <main className="flex flex-grow flex-col items-center justify-start p-4 sm:p-8 md:p-12 lg:p-16 bg-background space-y-8">
+    // Use flex container with flex-col, center items, and adjust padding
+    <main className="flex flex-grow flex-col items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-background text-center space-y-10">
+
+       {/* Introductory Text */}
+       <div className="max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-primary flex items-center justify-center gap-2">
+              <CheckSquare className="h-8 w-8" /> BlockAttend
+          </h1>
+          <p className="text-lg text-muted-foreground">
+              Securely register your class attendance using your Ethereum wallet and a daily key.
+          </p>
+        </div>
+
+
       {/* Render the AttendanceRegistration component */}
       <AttendanceRegistration onSubmit={addRecord} />
 
       {/* Separator */}
-      <Separator className="my-8 w-full max-w-4xl" />
+      <Separator className="my-6 w-full max-w-md" /> {/* Shortened separator */}
 
       {/* Attendance Log Link Bar */}
-      <div className="w-full max-w-4xl space-y-4">
+      <div className="w-full max-w-lg space-y-4">
          {/* Styled Div Bar for Attendance Log Title and Link */}
-         <div className="flex items-center justify-between bg-primary text-primary-foreground p-3 rounded-lg shadow">
-            <div className="flex items-center gap-2">
-                <ListChecks className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">Attendance Log</h2>
+         <div className="flex flex-col sm:flex-row items-center justify-between bg-card border border-border p-4 rounded-lg shadow-sm text-left"> {/* Adjusted background and layout */}
+            <div className="flex items-center gap-2 mb-3 sm:mb-0">
+                <ListChecks className="h-5 w-5 text-primary" />
+                <div>
+                    <h2 className="text-lg font-semibold text-card-foreground">Attendance Log</h2>
+                    <p className="text-sm text-muted-foreground">View all your past entries.</p>
+                </div>
             </div>
              <Link href="/log" passHref>
-                <Button variant="secondary" size="sm" className="bg-white text-primary hover:bg-gray-100">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto"> {/* Changed variant */}
                    View Full Log <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
              </Link>
          </div>
 
-         {/* The AttendanceList component is removed from this page */}
-         {/* <AttendanceList records={attendanceRecords} onDelete={deleteRecord} /> */}
-         <p className="text-center text-muted-foreground text-sm">
+         {/* Removed the placeholder paragraph */}
+         {/* <p className="text-center text-muted-foreground text-sm">
              Click the button above to view all recorded attendance entries.
-         </p>
+         </p> */}
       </div>
     </main>
   );
 }
 
 
-// Helper function to get subject label (copied from attendance-list for use in toast)
-// Keep consistent with the list in attendance-registration.tsx
+// Helper function to get subject label
 const subjects = [
   { value: 'math-101', label: 'Calculus I' },
   { value: 'phys-202', label: 'Physics for Engineers' },
@@ -94,5 +103,5 @@ const subjects = [
 
 function getSubjectLabel(value: string): string {
   const subject = subjects.find(s => s.value === value);
-  return subject ? subject.label : value; // Return value itself if not found
+  return subject ? subject.label : value;
 }

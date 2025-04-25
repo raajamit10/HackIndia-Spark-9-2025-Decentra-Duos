@@ -4,16 +4,16 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { KeyRound, CalendarDays, Copy, WalletCards, BookOpen, Check, Loader2, AlertCircle, Wallet } from 'lucide-react'; // Updated icons, added Wallet
+import { KeyRound, CalendarDays, Copy, WalletCards, BookOpen, Check, Loader2, AlertCircle, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select components
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useWalletConnection } from '@/hooks/useWalletConnection'; // Import wallet hook
-import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton component
+import { useWalletConnection } from '@/hooks/useWalletConnection';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AttendanceRegistrationProps {
   // onSubmit expects dateTime, subject, and walletAddress
@@ -48,9 +48,9 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
   const [dailyKeyInput, setDailyKeyInput] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [todaysGeneratedKey, setTodaysGeneratedKey] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Corrected initial state type
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { toast } = useToast();
-  const { account, connectWallet, isLoading: isWalletLoading, error: walletError } = useWalletConnection(); // Use wallet hook
+  const { account, connectWallet, isLoading: isWalletLoading, error: walletError } = useWalletConnection(); // Keep walletError for display
 
   // Generate today's key when the component mounts
   useEffect(() => {
@@ -78,7 +78,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); // Clear previous errors
+    // Error state removed, validation handled via toasts below
 
     // 1. Check Wallet Connection
     if (!account) {
@@ -87,8 +87,6 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
         description: "Please connect your wallet to register attendance.",
         variant: "destructive",
       });
-      // Optionally trigger wallet connection programmatically
-      // await connectWallet();
       return; // Stop submission if wallet not connected
     }
 
@@ -133,7 +131,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
         const submissionDateTime = new Date().toISOString();
 
         // Call the onSubmit prop passed from the parent component
-        onSubmit(submissionDateTime, selectedSubject, account);
+        onSubmit(submissionDateTime, selectedSubject, account); // Pass wallet address too
 
         // Reset form fields after successful submission
         setSelectedSubject('');
@@ -152,32 +150,21 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
     }
   };
 
-  // --- Error Handling ---
-  const [error, setError] = useState<string | null>(null); // Local error state for form
-
-  // Display wallet connection errors
-  useEffect(() => {
-    if (walletError) {
-        setError(`Wallet Error: ${walletError}`);
-    }
-  }, [walletError]);
-
-
   return (
-    <Card className="w-full max-w-lg shadow-xl rounded-lg border-none bg-card text-card-foreground">
-      <CardHeader className="bg-primary text-primary-foreground rounded-t-lg p-4 flex flex-row justify-between items-center">
+    <Card className="w-full max-w-lg shadow-xl rounded-lg border-none bg-card text-card-foreground overflow-hidden">
+      <CardHeader className="bg-gradient-to-br from-primary-gradient-start to-primary-gradient-end text-primary-foreground rounded-t-lg p-4 flex flex-row justify-between items-center"> {/* Applied gradient */}
         <CardTitle className="text-lg font-semibold">Attendance Registration</CardTitle>
          <KeyRound className="h-5 w-5" />
       </CardHeader>
       <CardContent className="p-6 space-y-6">
          {/* Description Text */}
          <p className="text-sm text-muted-foreground">
-            Select your subject and enter the daily key provided for the class to register your attendance. Location will be recorded.
+            Select your subject and enter the daily key provided for the class to register your attendance.
          </p>
 
         {/* Today's Key Section */}
-        <div className="bg-secondary p-4 rounded-md space-y-2 border border-border">
-           <div className="flex items-center gap-2 text-sm font-medium text-secondary-foreground">
+        <div className="bg-muted/50 p-4 rounded-md space-y-3 border border-border/50"> {/* Subtle background, more padding */}
+           <div className="flex items-center gap-2 text-sm font-medium text-foreground"> {/* Adjusted text color */}
              <KeyRound className="h-4 w-4 text-primary"/>
              <span>Today's Key</span>
            </div>
@@ -185,7 +172,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
               <CalendarDays className="h-3 w-3"/>
               <span>Valid for: {format(new Date(), 'PPP')}</span>
             </div>
-           <div className="flex items-center justify-between p-3 border border-dashed border-accent/50 rounded-md bg-muted/50 text-accent-foreground">
+           <div className="flex items-center justify-between p-3 border border-dashed border-accent/50 rounded-md bg-background text-accent-foreground"> {/* Use background for inner part */}
              <code className="text-lg font-mono font-semibold tracking-wider text-accent">
                {todaysGeneratedKey || <Skeleton className="h-6 w-32" />}
              </code>
@@ -211,9 +198,9 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
                  {isWalletLoading ? (
                      <Skeleton className="h-4 w-48" />
                  ) : account ? (
-                     <span className="truncate font-mono text-foreground">{account}</span>
+                     <span className="truncate font-mono text-foreground flex-1">{account}</span> {/* Added flex-1 */}
                  ) : (
-                     <span className="italic">Not connected</span>
+                     <span className="italic flex-1">Not connected</span> {/* Added flex-1 */}
                  )}
                  {account && (
                    <Button
@@ -221,7 +208,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
                      variant="ghost"
                      size="icon"
                      onClick={() => copyToClipboard(account, "Wallet address copied!")}
-                     className="ml-auto h-7 w-7 text-muted-foreground hover:text-primary"
+                     className="ml-auto h-7 w-7 text-muted-foreground hover:text-primary flex-shrink-0" // Added flex-shrink-0
                      aria-label="Copy Wallet Address"
                    >
                      <Copy className="h-4 w-4" />
@@ -229,15 +216,22 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
                  )}
              </div>
              {!account && !isWalletLoading && (
-                 <Button variant="outline" size="sm" onClick={connectWallet} className="mt-1">
+                 <Button variant="outline" size="sm" onClick={connectWallet} className="mt-2 w-full sm:w-auto"> {/* Adjusted button size/width */}
                      <Wallet className="mr-2 h-4 w-4"/> Connect Wallet
                  </Button>
+             )}
+             {/* Display Wallet Connection Errors */}
+             {walletError && (
+                 <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/30 mt-2"> {/* Style error message */}
+                   <AlertCircle className="h-4 w-4" />
+                   <span>Wallet Error: {walletError}</span>
+                 </div>
              )}
         </div>
 
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5"> {/* Increased spacing */}
           {/* Subject Selection */}
           <div className="space-y-2">
             <Label htmlFor="subject-select" className="text-sm font-medium text-foreground">Subject</Label>
@@ -265,26 +259,20 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
                   <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                   <Input
                   id="daily-key-input"
-                  type="text" // Changed from password to text as per UI
+                  type="text"
                   value={dailyKeyInput}
                   onChange={(e) => setDailyKeyInput(e.target.value)}
-                  className="pl-10 bg-input" // Added padding and background
+                  className="pl-10 bg-input"
                   placeholder="Enter today's key"
                   required
                   />
               </div>
           </div>
 
-           {/* Display General Errors */}
-           {error && (
-             <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/30">
-               <AlertCircle className="h-4 w-4" />
-               <span>{error}</span>
-             </div>
-           )}
+           {/* Display General Errors section removed as validation is handled by toasts */}
 
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isSubmitting || isWalletLoading}>
+          <Button type="submit" className="w-full bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-primary-foreground hover:opacity-90 transition-opacity duration-200" disabled={isSubmitting || isWalletLoading}> {/* Added gradient to button */}
              {isSubmitting ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (

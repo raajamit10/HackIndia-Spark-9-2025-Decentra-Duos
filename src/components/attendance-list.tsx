@@ -13,17 +13,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash2, ListChecks, Info } from 'lucide-react'; // Import icons
-import type { AttendanceRecord } from '@/app/page'; // Import the interface
+import { Card, CardContent } from '@/components/ui/card'; // Removed header imports
+import { Trash2, Info } from 'lucide-react'; // Removed ListChecks
+import type { AttendanceRecord } from '@/app/page';
 
 interface AttendanceListProps {
   records: AttendanceRecord[];
   onDelete: (id: string) => void;
 }
 
-// Helper to find subject label from value (can be moved to a shared util if needed)
-// Ensure this list matches the one in attendance-registration.tsx
+// Helper to find subject label
 const subjects = [
   { value: 'math-101', label: 'Calculus I' },
   { value: 'phys-202', label: 'Physics for Engineers' },
@@ -41,63 +40,53 @@ const subjects = [
 
 function getSubjectLabel(value: string): string {
   const subject = subjects.find(s => s.value === value);
-  return subject ? subject.label : value; // Return value itself if not found
+  return subject ? subject.label : value;
 }
 
 
 export function AttendanceList({ records, onDelete }: AttendanceListProps) {
   return (
-    <Card className="shadow-lg rounded-lg border bg-card text-card-foreground">
-      {/* CardHeader removed to match the requested UI in page.tsx */}
-      {/* <CardHeader>
-        <div className="flex items-center justify-between">
-           <CardTitle className="text-xl font-bold flex items-center gap-2">
-             <ListChecks className="h-5 w-5 text-primary" /> Attendance Log
-           </CardTitle>
-        </div>
-         <CardDescription>A list of your recent attendance records.</CardDescription>
-      </CardHeader> */}
-      <CardContent className="pt-4"> {/* Added padding-top since header is removed */}
+    <Card className="shadow-none rounded-lg border-none bg-transparent"> {/* Removed card styling, make it transparent */}
+      <CardContent className="p-0"> {/* Remove card padding */}
         {records.length === 0 ? (
-           <div className="text-center py-10 text-muted-foreground flex flex-col items-center gap-2">
-              <Info className="h-6 w-6" />
-              <p>No attendance records found.</p>
-              <p className="text-sm">Register your attendance using the form above.</p>
-            </div>
+           // No need for the 'no records' message here, it's handled in the LogPage
+           null
         ) : (
-          <Table>
-            <TableCaption>End of attendance records.</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Subject</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Wallet Address</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {records.map((record) => (
-                <TableRow key={record.id}>
-                  <TableCell className="font-medium">{getSubjectLabel(record.subject)}</TableCell>
-                  <TableCell>{format(new Date(record.dateTime), 'PPP p')}</TableCell>
-                  <TableCell className="font-mono text-xs truncate max-w-[150px] sm:max-w-[200px]" title={record.walletAddress ?? 'N/A'}>
-                    {record.walletAddress ? `${record.walletAddress.substring(0, 6)}...${record.walletAddress.substring(record.walletAddress.length - 4)}` : 'N/A'}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(record.id)}
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      aria-label="Delete record"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+          <div className="border rounded-lg overflow-hidden"> {/* Added border wrapper */}
+            <Table>
+                <TableCaption className="py-4">End of attendance records.</TableCaption>
+                <TableHeader className="bg-muted/50"> {/* Subtle header background */}
+                <TableRow>
+                    <TableHead className="w-[35%] sm:w-[30%]">Subject</TableHead>
+                    <TableHead className="w-[35%] sm:w-[30%]">Date & Time</TableHead>
+                    <TableHead className="hidden sm:table-cell sm:w-[30%]">Wallet Address</TableHead> {/* Hide on small screens */}
+                    <TableHead className="text-right w-[10%] sm:w-[10%]">Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                {records.map((record) => (
+                    <TableRow key={record.id} className="hover:bg-muted/30 transition-colors duration-150"> {/* Subtle hover */}
+                    <TableCell className="font-medium py-3">{getSubjectLabel(record.subject)}</TableCell>
+                    <TableCell className="py-3">{format(new Date(record.dateTime), 'PP p')}</TableCell> {/* Changed format */}
+                    <TableCell className="font-mono text-xs truncate max-w-[150px] sm:max-w-none hidden sm:table-cell py-3" title={record.walletAddress ?? 'N/A'}>
+                        {record.walletAddress ?? 'N/A'} {/* Show full address on medium+ */}
+                    </TableCell>
+                    <TableCell className="text-right py-2"> {/* Adjusted padding */}
+                        <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(record.id)}
+                        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive h-8 w-8" // Slightly smaller, better hover
+                        aria-label="Delete record"
+                        >
+                        <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
