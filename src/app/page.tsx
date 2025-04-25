@@ -2,15 +2,15 @@
 
 import * as React from 'react';
 import { AttendanceRegistration } from '@/components/attendance-registration'; // Import the new component
+import { AttendanceList } from '@/components/attendance-list'; // Import AttendanceList
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator'; // Import Separator
 
 export interface AttendanceRecord {
   id: string; // Keep the ID for potential future use (like viewing logs)
   dateTime: string;
   subject: string; // Add subject
-  // Password/Key is not stored directly in the record list for this UI,
-  // it's used for validation during submission.
   walletAddress: string | null; // Store the wallet address used for registration
 }
 
@@ -26,7 +26,7 @@ export default function Home() {
       subject: subject,
       walletAddress: walletAddress,
     };
-    setAttendanceRecords((prevRecords) => [...prevRecords, newRecord]);
+    setAttendanceRecords((prevRecords) => [newRecord, ...prevRecords]); // Add new records to the top
     toast({
       title: "Attendance Registered",
       description: `Attendance for ${subject} at ${new Date(dateTime).toLocaleString()} marked successfully.`,
@@ -34,7 +34,7 @@ export default function Home() {
     });
   };
 
-  // Delete record function (might be used in a future "Log" page, keep it for now)
+  // Delete record function
   const deleteRecord = (id: string) => {
     setAttendanceRecords((prevRecords) => prevRecords.filter((record) => record.id !== id));
      toast({
@@ -45,15 +45,19 @@ export default function Home() {
   };
 
   return (
-    // Use flex container to center the registration card
-    <main className="flex flex-grow items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-background">
-      {/* Render the new AttendanceRegistration component */}
+    // Use flex container with flex-col to stack components
+    <main className="flex flex-grow flex-col items-center justify-start p-4 sm:p-8 md:p-12 lg:p-16 bg-background space-y-8">
+      {/* Render the AttendanceRegistration component */}
       <AttendanceRegistration onSubmit={addRecord} />
-      {/*
-        The AttendanceList is removed from the main page as per the new UI.
-        It could potentially be moved to a separate "/log" page later.
+
+      {/* Separator */}
+      <Separator className="my-8 w-full max-w-4xl" />
+
+      {/* Render the AttendanceList component */}
+      <div className="w-full max-w-4xl">
+        <h2 className="text-2xl font-semibold mb-4 text-center text-foreground">Recent Attendance Records</h2>
         <AttendanceList records={attendanceRecords} onDelete={deleteRecord} />
-       */}
+      </div>
     </main>
   );
 }
