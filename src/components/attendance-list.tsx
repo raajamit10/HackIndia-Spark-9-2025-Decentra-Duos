@@ -12,14 +12,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-// Removed Button import as it's no longer needed
-import { Card, CardContent } from '@/components/ui/card'; // Removed header imports
-// Removed Trash2 import
+import { Card, CardContent } from '@/components/ui/card';
 import type { AttendanceRecord } from '@/app/page';
+import { MapPin } from 'lucide-react'; // Import MapPin icon
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+  } from "@/components/ui/tooltip"; // Import Tooltip components
+
 
 interface AttendanceListProps {
   records: AttendanceRecord[];
-  // Removed onDelete prop definition
 }
 
 // Helper to find subject label
@@ -44,42 +49,55 @@ function getSubjectLabel(value: string): string {
 }
 
 
-// Removed onDelete from component signature
 export function AttendanceList({ records }: AttendanceListProps) {
   return (
-    <Card className="shadow-none rounded-lg border-none bg-transparent"> {/* Removed card styling, make it transparent */}
-      <CardContent className="p-0"> {/* Remove card padding */}
-        {records.length === 0 ? (
-           // No need for the 'no records' message here, it's handled in the LogPage
-           null
-        ) : (
-          <div className="border rounded-lg overflow-hidden"> {/* Added border wrapper */}
-            <Table>
+    <TooltipProvider> {/* Wrap with TooltipProvider */}
+        <Card className="shadow-none rounded-lg border-none bg-transparent">
+        <CardContent className="p-0">
+            {records.length === 0 ? (
+            null // Handled in LogPage
+            ) : (
+            <div className="border rounded-lg overflow-hidden">
+                <Table>
                 <TableCaption className="py-4">End of attendance records.</TableCaption>
-                <TableHeader className="bg-muted/50"> {/* Subtle header background */}
-                <TableRow>
-                    <TableHead className="w-[40%] sm:w-[35%]">Subject</TableHead> {/* Adjusted width */}
-                    <TableHead className="w-[40%] sm:w-[35%]">Date & Time</TableHead> {/* Adjusted width */}
-                    <TableHead className="hidden sm:table-cell sm:w-[30%]">Wallet Address</TableHead> {/* Hide on small screens */}
-                    {/* Removed Action TableHead */}
-                </TableRow>
+                <TableHeader className="bg-muted/50">
+                    <TableRow>
+                    <TableHead className="w-[35%] sm:w-[30%]">Subject</TableHead> {/* Adjusted width */}
+                    <TableHead className="w-[35%] sm:w-[30%]">Date & Time</TableHead> {/* Adjusted width */}
+                    <TableHead className="hidden md:table-cell sm:w-[25%]">Wallet Address</TableHead> {/* Hide on small, show on medium+ */}
+                    <TableHead className="w-[15%] sm:w-[10%] text-center">Location</TableHead> {/* Added Location column */}
+                    </TableRow>
                 </TableHeader>
                 <TableBody>
-                {records.map((record) => (
-                    <TableRow key={record.id} className="hover:bg-muted/30 transition-colors duration-150"> {/* Subtle hover */}
-                    <TableCell className="font-medium py-3">{getSubjectLabel(record.subject)}</TableCell>
-                    <TableCell className="py-3">{format(new Date(record.dateTime), 'PP p')}</TableCell> {/* Changed format */}
-                    <TableCell className="font-mono text-xs truncate max-w-[150px] sm:max-w-none hidden sm:table-cell py-3" title={record.walletAddress ?? 'N/A'}>
-                        {record.walletAddress ?? 'N/A'} {/* Show full address on medium+ */}
-                    </TableCell>
-                    {/* Removed TableCell containing the delete button */}
+                    {records.map((record) => (
+                    <TableRow key={record.id} className="hover:bg-muted/30 transition-colors duration-150">
+                        <TableCell className="font-medium py-3">{getSubjectLabel(record.subject)}</TableCell>
+                        <TableCell className="py-3">{format(new Date(record.dateTime), 'PP p')}</TableCell>
+                        <TableCell className="font-mono text-xs truncate max-w-[100px] md:max-w-none hidden md:table-cell py-3" title={record.walletAddress ?? 'N/A'}>
+                           {record.walletAddress ?? 'N/A'}
+                        </TableCell>
+                        <TableCell className="py-3 text-center">
+                        {record.latitude !== undefined && record.longitude !== undefined ? (
+                             <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <MapPin className="h-4 w-4 text-primary inline-block cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Lat: {record.latitude.toFixed(5)}, Lon: {record.longitude.toFixed(5)}</p>
+                                </TooltipContent>
+                             </Tooltip>
+                        ) : (
+                            <span className="text-muted-foreground text-xs">N/A</span>
+                        )}
+                        </TableCell>
                     </TableRow>
-                ))}
+                    ))}
                 </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                </Table>
+            </div>
+            )}
+        </CardContent>
+        </Card>
+    </TooltipProvider>
   );
 }

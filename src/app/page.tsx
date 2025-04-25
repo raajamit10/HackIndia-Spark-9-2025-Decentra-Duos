@@ -15,24 +15,117 @@ export interface AttendanceRecord {
   dateTime: string;
   subject: string;
   walletAddress: string | null;
+  latitude?: number; // Optional: Store location
+  longitude?: number; // Optional: Store location
 }
+
+// --- Location Configuration ---
+const ALLOWED_LOCATION = {
+    // Example: Los Angeles City Hall (replace with actual coordinates)
+    latitude: 34.0522,
+    longitude: -118.2437,
+};
+const MAX_DISTANCE_KM = 0.1; // 100 meters allowed radius
+
+// --- Helper Functions ---
+
+// Haversine formula to calculate distance between two points on Earth
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in km
+  return d;
+}
+
+function deg2rad(deg: number): number {
+  return deg * (Math.PI / 180);
+}
+
+// Helper function to get subject label
+const subjects = [
+  { value: 'math-101', label: 'Calculus I' },
+  { value: 'phys-202', label: 'Physics for Engineers' },
+  { value: 'chem-301', label: 'General Chemistry' },
+  { value: 'cs-101', label: 'Intro to Computer Science' },
+  { value: 'ee-201', label: 'Circuit Theory I' },
+  { value: 'me-301', label: 'Thermodynamics' },
+  { value: 'ce-201', label: 'Statics' },
+  { value: 'cs-305', label: 'Data Structures & Algorithms' },
+  { value: 'ee-302', label: 'Signals and Systems' },
+  { value: 'me-302', label: 'Fluid Mechanics' },
+  { value: 'ce-302', label: 'Structural Analysis' },
+  { value: 'eng-100', label: 'Introduction to Engineering Design' },
+];
+
+function getSubjectLabel(value: string): string {
+  const subject = subjects.find(s => s.value === value);
+  return subject ? subject.label : value;
+}
+
 
 export default function Home() {
   const [attendanceRecords, setAttendanceRecords] = useLocalStorage<AttendanceRecord[]>('attendanceRecords', []);
   const { toast } = useToast();
 
-  const addRecord = (dateTime: string, subject: string, walletAddress: string | null) => {
+  // Updated addRecord to accept location and perform validation
+  const addRecord = (
+    dateTime: string,
+    subject: string,
+    walletAddress: string | null,
+    latitude?: number,
+    longitude?: number
+  ) => {
+
+    // 1. Location Validation (Client-side - for demo purposes)
+    if (latitude === undefined || longitude === undefined) {
+        toast({
+            title: "Location Missing",
+            description: "Could not verify location. Please ensure location services are enabled and permission is granted.",
+            variant: "destructive",
+        });
+        return; // Stop if location is missing
+    }
+
+    const distance = getDistanceFromLatLonInKm(
+        latitude,
+        longitude,
+        ALLOWED_LOCATION.latitude,
+        ALLOWED_LOCATION.longitude
+    );
+
+    console.log(`Distance from allowed location: ${distance.toFixed(4)} km`); // For debugging
+
+    if (distance > MAX_DISTANCE_KM) {
+        toast({
+            title: "Location Out of Range",
+            description: `You must be within ${MAX_DISTANCE_KM * 1000} meters of the allowed location to register attendance.`,
+            variant: "destructive",
+        });
+        return; // Stop if too far
+    }
+
+    // 2. If location is valid, create and save the record
     const newRecord: AttendanceRecord = {
       id: crypto.randomUUID(),
       dateTime: dateTime,
       subject: subject,
       walletAddress: walletAddress,
+      latitude: latitude, // Save location
+      longitude: longitude, // Save location
     };
+
     setAttendanceRecords((prevRecords) => [newRecord, ...prevRecords]);
+
     toast({
       title: "Attendance Registered",
-      description: `Attendance for ${getSubjectLabel(subject)} at ${new Date(dateTime).toLocaleString()} marked successfully.`,
-      variant: "default",
+      description: `Attendance for ${getSubjectLabel(subject)} at ${new Date(dateTime).toLocaleString()} marked successfully (Location Verified).`,
+      variant: "default", // Use default (success) variant
     });
   };
 
@@ -46,7 +139,7 @@ export default function Home() {
               <CheckSquare className="h-8 w-8" /> BlockAttend
           </h1>
           <p className="text-lg text-muted-foreground">
-              Securely register your class attendance using your Ethereum wallet and a daily key.
+              Securely register your class attendance using your Ethereum wallet, a daily key, and location verification.
           </p>
         </div>
 
@@ -74,34 +167,8 @@ export default function Home() {
                 </Button>
              </Link>
          </div>
-
-         {/* Removed the placeholder paragraph */}
-         {/* <p className="text-center text-muted-foreground text-sm">
-             Click the button above to view all recorded attendance entries.
-         </p> */}
       </div>
     </main>
   );
 }
 
-
-// Helper function to get subject label
-const subjects = [
-  { value: 'math-101', label: 'Calculus I' },
-  { value: 'phys-202', label: 'Physics for Engineers' },
-  { value: 'chem-301', label: 'General Chemistry' },
-  { value: 'cs-101', label: 'Intro to Computer Science' },
-  { value: 'ee-201', label: 'Circuit Theory I' },
-  { value: 'me-301', label: 'Thermodynamics' },
-  { value: 'ce-201', label: 'Statics' },
-  { value: 'cs-305', label: 'Data Structures & Algorithms' },
-  { value: 'ee-302', label: 'Signals and Systems' },
-  { value: 'me-302', label: 'Fluid Mechanics' },
-  { value: 'ce-302', label: 'Structural Analysis' },
-  { value: 'eng-100', label: 'Introduction to Engineering Design' },
-];
-
-function getSubjectLabel(value: string): string {
-  const subject = subjects.find(s => s.value === value);
-  return subject ? subject.label : value;
-}
