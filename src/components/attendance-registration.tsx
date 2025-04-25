@@ -155,7 +155,7 @@ export function AttendanceRegistration({ onSubmit }: AttendanceRegistrationProps
   return (
     <Card className="w-full max-w-lg shadow-xl rounded-lg border-none bg-card text-card-foreground overflow-hidden">
       <CardHeader className="bg-gradient-to-br from-primary-gradient-start to-primary-gradient-end text-primary-foreground rounded-t-lg p-4 flex flex-row justify-between items-center">
-        <CardTitle className="text-lg font-semibold">Attendance Registration</CardTitle>
+        <CardTitle className="text-lg font-bold">Attendance Registration</CardTitle> {/* Added font-bold */}
          <KeyRound className="h-5 w-5" />
       </CardHeader>
       <CardContent className="p-6 space-y-6">
