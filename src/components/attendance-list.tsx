@@ -12,14 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+// Removed Button import as it's no longer needed
 import { Card, CardContent } from '@/components/ui/card'; // Removed header imports
-import { Trash2, Info } from 'lucide-react'; // Removed ListChecks
+// Removed Trash2 import
 import type { AttendanceRecord } from '@/app/page';
 
 interface AttendanceListProps {
   records: AttendanceRecord[];
-  onDelete: (id: string) => void;
+  // Removed onDelete prop definition
 }
 
 // Helper to find subject label
@@ -44,7 +44,8 @@ function getSubjectLabel(value: string): string {
 }
 
 
-export function AttendanceList({ records, onDelete }: AttendanceListProps) {
+// Removed onDelete from component signature
+export function AttendanceList({ records }: AttendanceListProps) {
   return (
     <Card className="shadow-none rounded-lg border-none bg-transparent"> {/* Removed card styling, make it transparent */}
       <CardContent className="p-0"> {/* Remove card padding */}
@@ -57,10 +58,10 @@ export function AttendanceList({ records, onDelete }: AttendanceListProps) {
                 <TableCaption className="py-4">End of attendance records.</TableCaption>
                 <TableHeader className="bg-muted/50"> {/* Subtle header background */}
                 <TableRow>
-                    <TableHead className="w-[35%] sm:w-[30%]">Subject</TableHead>
-                    <TableHead className="w-[35%] sm:w-[30%]">Date & Time</TableHead>
+                    <TableHead className="w-[40%] sm:w-[35%]">Subject</TableHead> {/* Adjusted width */}
+                    <TableHead className="w-[40%] sm:w-[35%]">Date & Time</TableHead> {/* Adjusted width */}
                     <TableHead className="hidden sm:table-cell sm:w-[30%]">Wallet Address</TableHead> {/* Hide on small screens */}
-                    <TableHead className="text-right w-[10%] sm:w-[10%]">Action</TableHead>
+                    {/* Removed Action TableHead */}
                 </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -71,17 +72,7 @@ export function AttendanceList({ records, onDelete }: AttendanceListProps) {
                     <TableCell className="font-mono text-xs truncate max-w-[150px] sm:max-w-none hidden sm:table-cell py-3" title={record.walletAddress ?? 'N/A'}>
                         {record.walletAddress ?? 'N/A'} {/* Show full address on medium+ */}
                     </TableCell>
-                    <TableCell className="text-right py-2"> {/* Adjusted padding */}
-                        <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(record.id)}
-                        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive h-8 w-8" // Slightly smaller, better hover
-                        aria-label="Delete record"
-                        >
-                        <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </TableCell>
+                    {/* Removed TableCell containing the delete button */}
                     </TableRow>
                 ))}
                 </TableBody>

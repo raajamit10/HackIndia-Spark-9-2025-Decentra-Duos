@@ -5,24 +5,18 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, ListChecks, Info, FileText } from 'lucide-react'; // Added FileText
+import { ArrowLeft, Info, FileText } from 'lucide-react'; // Added FileText, removed ListChecks
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { AttendanceRecord } from '@/app/page';
 import { AttendanceList } from '@/components/attendance-list';
-import { useToast } from '@/hooks/use-toast';
+// Removed useToast import as it's no longer needed for delete confirmation
 
 export default function LogPage() {
-  const [attendanceRecords, setAttendanceRecords] = useLocalStorage<AttendanceRecord[]>('attendanceRecords', []);
-  const { toast } = useToast();
+  // Removed setAttendanceRecords and deleteRecord function as deletion is disabled
+  const [attendanceRecords] = useLocalStorage<AttendanceRecord[]>('attendanceRecords', []);
+  // Removed useToast call
 
-  const deleteRecord = (id: string) => {
-    setAttendanceRecords((prevRecords) => prevRecords.filter((record) => record.id !== id));
-    toast({
-      title: "Record Deleted",
-      description: "The attendance record has been removed from the log.",
-      variant: "destructive",
-    });
-  };
+  // Removed deleteRecord function
 
   return (
     <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center p-4 sm:p-8 md:p-12 lg:p-16 bg-background">
@@ -44,7 +38,8 @@ export default function LogPage() {
         </CardHeader>
         <CardContent className="p-4 sm:p-6"> {/* Adjusted padding */}
            {attendanceRecords.length > 0 ? (
-              <AttendanceList records={attendanceRecords} onDelete={deleteRecord} />
+              // Remove onDelete prop from AttendanceList
+              <AttendanceList records={attendanceRecords} />
            ) : (
              <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-3 border border-dashed rounded-lg"> {/* More padding and border */}
                 <Info className="h-8 w-8" /> {/* Larger icon */}
