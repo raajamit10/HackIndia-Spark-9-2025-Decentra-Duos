@@ -34,9 +34,19 @@ export function Navbar() {
                <Tooltip>
                  <TooltipTrigger asChild>
                    {account ? (
-                     <Button variant="secondary" size="sm" onClick={disconnectWallet}>
-                       <Wallet className="mr-1.5 h-4 w-4 text-green-500" /> {/* Indicate connected state */}
+                     <Button variant="secondary" size="sm" onClick={disconnectWallet} className="flex items-center gap-2">
+                       <Wallet className="h-4 w-4 text-green-500" /> {/* Indicate connected state */}
                        <span>{formatAddress(account)}</span>
+                       <span className="text-xs text-muted-foreground">(</span>
+                       <Coins className="h-3 w-3 text-accent" />
+                       {balance !== null ? (
+                         <span className="text-xs font-medium">{balance} ETH</span>
+                       ) : isLoading ? (
+                           <Skeleton className="h-3 w-10" />
+                       ) : (
+                           <span className="text-xs text-muted-foreground">N/A</span>
+                       )}
+                       <span className="text-xs text-muted-foreground">)</span>
                      </Button>
                    ) : (
                      <Button
