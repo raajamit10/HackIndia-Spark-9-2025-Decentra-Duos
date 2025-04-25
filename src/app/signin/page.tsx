@@ -1,11 +1,13 @@
+
 'use client';
 
 import React from 'react';
+import Link from 'next/link'; // Import Link
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { LogIn } from 'lucide-react';
+import { LogIn, ArrowLeft } from 'lucide-react'; // Import ArrowLeft
 
 export default function SignInPage() {
   // Placeholder sign-in handler
@@ -37,6 +39,14 @@ export default function SignInPage() {
               <LogIn className="mr-2 h-4 w-4" /> Sign In
             </Button>
           </form>
+           {/* Go Back Button */}
+           <div className="mt-4 text-center">
+            <Link href="/" passHref>
+              <Button variant="outline" className="w-full">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+              </Button>
+            </Link>
+          </div>
           {/* Optionally add links for password reset or sign up */}
           {/* <div className="mt-4 text-center text-sm">
             <p>
@@ -56,3 +66,4 @@ export default function SignInPage() {
     </main>
   );
 }
+
