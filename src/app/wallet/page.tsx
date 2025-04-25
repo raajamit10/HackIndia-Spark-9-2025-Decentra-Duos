@@ -5,11 +5,12 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
-import { Wallet, LogOut, Loader2, AlertCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge'; // Import Badge
+import { Wallet, LogOut, Loader2, AlertCircle, Coins } from 'lucide-react'; // Import Coins icon
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 export default function WalletPage() {
-  const { connectWallet, disconnectWallet, account, provider, error, isLoading } = useWalletConnection();
+  const { connectWallet, disconnectWallet, account, provider, balance, error, isLoading } = useWalletConnection();
 
   return (
     <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-4 bg-secondary">
@@ -24,9 +25,23 @@ export default function WalletPage() {
           {account ? (
             <div className="space-y-4">
               <p className="text-lg font-medium text-foreground">Connected!</p>
-              <Badge variant="secondary" className="text-sm break-all px-3 py-1">
+              <Badge variant="secondary" className="text-sm break-all px-3 py-1 block max-w-full truncate"> {/* Ensure badge truncates */}
                 {account}
               </Badge>
+              {/* Display Balance */}
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                 <Coins className="h-5 w-5 text-accent" />
+                 <span className="font-medium">Balance:</span>
+                 {balance !== null ? (
+                   <span className="font-semibold text-foreground">{balance} ETH</span>
+                 ) : provider && !error ? (
+                    // Show skeleton while balance is loading (or if fetch failed silently)
+                    <Skeleton className="h-5 w-20" />
+                 ) : (
+                    // Show N/A if provider isn't ready or there was an error before balance fetch
+                   <span className="text-muted-foreground">N/A</span>
+                 )}
+              </div>
               <Button
                 onClick={disconnectWallet}
                 variant="outline"

@@ -3,13 +3,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Clock, LogIn, Wallet, LogOut, Loader2 } from 'lucide-react'; // Added LogOut, Loader2
+import { Clock, LogIn, Wallet, LogOut, Loader2, Coins } from 'lucide-react'; // Added Coins
 import { Button } from '@/components/ui/button';
 import { useWalletConnection } from '@/hooks/useWalletConnection'; // Import the hook
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // Import Tooltip
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 export function Navbar() {
-  const { connectWallet, disconnectWallet, account, isLoading, error } = useWalletConnection();
+  const { connectWallet, disconnectWallet, account, balance, isLoading, error } = useWalletConnection(); // Get balance
 
   const formatAddress = (address: string | null): string => {
     if (!address) return '';
@@ -34,7 +35,7 @@ export function Navbar() {
                  <TooltipTrigger asChild>
                    {account ? (
                      <Button variant="secondary" size="sm" onClick={disconnectWallet}>
-                       <LogOut className="mr-2 h-4 w-4" />
+                       <Wallet className="mr-1.5 h-4 w-4 text-green-500" /> {/* Indicate connected state */}
                        <span>{formatAddress(account)}</span>
                      </Button>
                    ) : (
@@ -54,8 +55,26 @@ export function Navbar() {
                    )}
                  </TooltipTrigger>
                  <TooltipContent>
-                    {account ? `Click to disconnect ${account}` : 'Connect your wallet'}
-                    {error && <p className="text-destructive text-xs mt-1">{error}</p>}
+                   {account ? (
+                     <div className="text-sm space-y-1">
+                       <p>Account: {account}</p>
+                       <div className="flex items-center gap-1">
+                         <Coins className="h-4 w-4 text-accent" />
+                         <span>Balance:</span>
+                         {balance !== null ? (
+                           <span className="font-medium">{balance} ETH</span>
+                         ) : isLoading ? (
+                           <Skeleton className="h-4 w-16" />
+                         ) : (
+                           <span>N/A</span>
+                         )}
+                       </div>
+                       <p className="text-xs text-muted-foreground mt-2">Click to disconnect</p>
+                     </div>
+                   ) : (
+                     <p>Connect your wallet</p>
+                   )}
+                   {error && <p className="text-destructive text-xs mt-1">{error}</p>}
                  </TooltipContent>
                </Tooltip>
              </TooltipProvider>
