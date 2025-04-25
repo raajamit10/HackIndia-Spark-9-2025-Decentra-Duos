@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link'; // Import Link
-import { Clock, LogIn } from 'lucide-react'; // Import LogIn icon
+import { Clock, LogIn, Wallet } from 'lucide-react'; // Import LogIn and Wallet icons
 import { Button } from '@/components/ui/button'; // Import Button
 
 export function Navbar() {
@@ -14,13 +14,22 @@ export function Navbar() {
               <Clock className="h-6 w-6 text-accent" /> {/* Use accent color for icon */}
               <span className="text-xl font-bold">Blockendance</span>
           </Link>
-          {/* Add Sign In button */}
-          <Link href="/signin" passHref>
-            <Button variant="secondary" size="sm">
-              <LogIn className="mr-2 h-4 w-4" />
-              Sign In
-            </Button>
-          </Link>
+          <div className="flex items-center space-x-2"> {/* Group buttons */}
+            {/* Add Wallet button */}
+            <Link href="/wallet" passHref>
+              <Button variant="secondary" size="sm">
+                <Wallet className="mr-2 h-4 w-4" />
+                Wallet
+              </Button>
+            </Link>
+            {/* Sign In button */}
+            <Link href="/signin" passHref>
+              <Button variant="secondary" size="sm">
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </nav>
