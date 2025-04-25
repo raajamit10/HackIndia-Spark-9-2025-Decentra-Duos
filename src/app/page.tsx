@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -22,8 +23,8 @@ export interface AttendanceRecord {
 // --- Location Configuration ---
 const ALLOWED_LOCATION = {
     // Example: Los Angeles City Hall (replace with actual coordinates)
-    latitude: 34.0522,
-    longitude: -118.2437,
+    latitude: 30.00850268544767,
+    longitude: 77.76385663463411,
 };
 const MAX_DISTANCE_KM = 10; // 10000 meters allowed radius
 
@@ -174,5 +175,6 @@ export default function Home() {
     </main>
   );
 }
+
 
 
