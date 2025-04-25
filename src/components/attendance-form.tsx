@@ -1,9 +1,10 @@
+
 'use client';
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Import useEffect
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Clock, Lock } from 'lucide-react'; // Import Lock icon
+import { Calendar as CalendarIcon, Clock, Lock, Info, Copy } from 'lucide-react'; // Import Info, Copy icons
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast'; // Import useToast
 
 interface AttendanceFormProps {
   onSubmit: (dateTime: string, password?: string) => void; // Update onSubmit signature
@@ -20,6 +22,32 @@ export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState<string>(format(new Date(), 'HH:mm'));
   const [password, setPassword] = useState<string>(''); // State for password
+  const [generatedId, setGeneratedId] = useState<string>(''); // State for generated ID
+  const { toast } = useToast(); // Initialize toast
+
+  // Generate UUID when the component mounts
+  useEffect(() => {
+    setGeneratedId(crypto.randomUUID());
+  }, []);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedId)
+      .then(() => {
+        toast({
+          title: "ID Copied",
+          description: "The unique ID has been copied to your clipboard.",
+        });
+      })
+      .catch(err => {
+        console.error('Failed to copy ID: ', err);
+         toast({
+          title: "Copy Failed",
+          description: "Could not copy the ID to clipboard.",
+          variant: "destructive",
+        });
+      });
+  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,9 +61,15 @@ export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
       // setDate(new Date());
       // setTime(format(new Date(), 'HH:mm'));
       // setPassword('');
+      // Optionally generate a new ID after submission
+      // setGeneratedId(crypto.randomUUID());
     } else if (!password) {
         // Basic validation feedback - could use form libraries for better UX
-        alert("Please enter the Unique ID (Password).");
+         toast({ // Use toast for validation feedback
+          title: "Missing Information",
+          description: "Please enter the Unique ID (Password).",
+          variant: "destructive",
+        });
     }
   };
 
@@ -86,9 +120,36 @@ export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
                <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
             </div>
           </div>
+
+           {/* Display Generated Unique ID */}
+           <div className="space-y-2">
+             <Label htmlFor="generated-id-display" className="text-muted-foreground flex items-center">
+                <Info className="mr-1 h-4 w-4 text-accent" /> Generated Unique ID
+              </Label>
+              <div className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
+                <code id="generated-id-display" className="text-sm text-foreground break-all select-all">
+                  {generatedId}
+                </code>
+                 <Button
+                    type="button" // Prevents form submission
+                    variant="ghost"
+                    size="icon"
+                    onClick={copyToClipboard}
+                    className="ml-2 h-7 w-7 text-muted-foreground hover:text-accent-foreground"
+                    aria-label="Copy Unique ID"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Use this ID in the field below. Keep it secure.
+              </p>
+          </div>
+
+
           {/* Password Input */}
           <div className="space-y-2">
-             <Label htmlFor="password-input" className="text-muted-foreground">Unique ID (Password)</Label>
+             <Label htmlFor="password-input" className="text-muted-foreground">Enter Unique ID (Password)</Label>
               <div className="relative">
                   <Input
                   id="password-input"
@@ -96,7 +157,7 @@ export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
-                  placeholder="Enter your unique ID"
+                  placeholder="Enter the generated unique ID here"
                   required
                   />
                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
@@ -110,3 +171,4 @@ export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
     </Card>
   );
 }
+
