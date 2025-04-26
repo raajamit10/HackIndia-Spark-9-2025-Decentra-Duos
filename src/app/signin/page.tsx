@@ -2,15 +2,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react'; // Import useEffect
-import Link from 'next/link';
+import Link from 'next/link'; // Import Link
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 // Removed Input and Label imports as they are no longer needed for email/password
-import { LogIn, ArrowLeft, Wallet, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { LogIn, ArrowLeft, Wallet, Loader2, AlertCircle, CheckCircle } from 'lucide-react'; // Import ArrowLeft
 import { useWalletConnection } from '@/hooks/useWalletConnection';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label'; // Import Label for wallet status
 
 export default function SignInPage() {
   const { connectWallet, account, isLoading: isWalletLoading, error: walletError } = useWalletConnection();
@@ -88,7 +89,7 @@ export default function SignInPage() {
           </div>
 
            {/* Go Back Button */}
-           <div className="mt-4 text-center">
+           <div className="mt-4 text-center border-t pt-4"> {/* Added border-t and pt-4 for separation */}
             <Link href="/" passHref>
               <Button variant="ghost" className="w-full text-muted-foreground" disabled={isWalletLoading}> {/* Disable while connecting */}
                 <ArrowLeft className="mr-2 h-4 w-4" /> Go Back to Home
@@ -100,6 +101,3 @@ export default function SignInPage() {
     </main>
   );
 }
-
-// Add Label component back if needed for Wallet Status section
-import { Label } from '@/components/ui/label';
