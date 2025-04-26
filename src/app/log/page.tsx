@@ -5,7 +5,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, Info, FileText } from 'lucide-react';
+import { ArrowLeft, Info, FileText, CalendarClock } from 'lucide-react'; // Added CalendarClock icon
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { AttendanceRecord } from '@/app/page';
 import { AttendanceList } from '@/components/attendance-list';
@@ -22,18 +22,19 @@ export default function LogPage() {
         <CardHeader className="bg-muted/50 p-4 rounded-t-lg border-b">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
              <div className="flex items-center gap-3">
-                <FileText className="h-7 w-7 text-primary flex-shrink-0" />
+                <CalendarClock className="h-7 w-7 text-primary flex-shrink-0" /> {/* Changed Icon */}
                 <div>
                     <CardTitle className="text-xl sm:text-2xl font-bold text-foreground">
-                        Full Attendance Log
+                        Attendance Timetable Log
                     </CardTitle>
-                    <CardDescription className="mt-1">View all past attendance records stored locally in your browser.</CardDescription>
+                    <CardDescription className="mt-1">A chronological, tabular view of your past attendance records stored locally.</CardDescription> {/* Updated Description */}
                 </div>
              </div>
           </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
            {attendanceRecords.length > 0 ? (
+              // The AttendanceList component already renders a table (tabular form)
               <AttendanceList records={attendanceRecords} />
            ) : (
              <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-3 border border-dashed rounded-lg">
